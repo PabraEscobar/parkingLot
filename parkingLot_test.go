@@ -15,3 +15,20 @@ func TestLotShouldNotCreatedWithCapacityZero(t *testing.T) {
 		t.Errorf("parking lot should not be created with zero capacity")
 	}
 }
+
+func TestCanMyCarBeParked(t *testing.T) {
+	l, _ := Newlot(5)
+	_, err := l.Park("KA03T4567")
+	if err != nil {
+		t.Errorf("Vehicle should be parked")
+	}
+}
+
+func TestVehicleNumberCannotbeEmpty(t *testing.T) {
+	l, _ := Newlot(5)
+	_, err := l.Park("")
+	if err == nil {
+		t.Error("vehicle number cannot be empty")
+	}
+}
+

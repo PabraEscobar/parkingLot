@@ -18,3 +18,10 @@ func Newlot(capacity uint) (*Lot, error) {
 	}
 	return &Lot{capacity: capacity, vehicles: nil}, nil
 }
+
+func (l *Lot) Park(vehicleNumber string) (bool, error) {
+	if vehicleNumber == "" {
+		return false, errors.New("vehicle number is mandatory to park")
+	}
+	return true, nil
+}
