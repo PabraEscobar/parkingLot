@@ -18,9 +18,12 @@ func TestLotShouldNotCreatedWithCapacityZero(t *testing.T) {
 
 func TestCanMyCarBeParked(t *testing.T) {
 	l, _ := Newlot(5)
-	_, err := l.Park("KA03T4567")
+	vehicle, err := l.Park("KA03T4567")
 	if err != nil {
 		t.Errorf("Vehicle should be parked")
+	}
+	if (*vehicle).lotId == uint(0) {
+		t.Errorf("slot id cannot be empty")
 	}
 }
 
@@ -29,13 +32,5 @@ func TestVehicleNumberCannotbeEmpty(t *testing.T) {
 	_, err := l.Park("")
 	if err == nil {
 		t.Error("vehicle number cannot be empty")
-	}
-}
-
-func TestCheckIfSlotAvailable(t *testing.T) {
-	l, _ := Newlot(2)
-	_, err := l.IsSlotAvailable()
-	if err != nil {
-		t.Errorf("Slot is available")
 	}
 }

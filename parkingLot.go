@@ -12,23 +12,30 @@ type Lot struct {
 	vehicles []*vehicle
 }
 
-func (l *Lot) IsSlotAvailable() (bool, error) {
-	if len(l.vehicles) == int(l.capacity) {
-		return false, errors.New("no slot is available")
-	}
-	return true, nil
-}
-
 func Newlot(capacity uint) (*Lot, error) {
 	if capacity == 0 {
 		return nil, errors.New("capacity can't be zero")
 	}
-	return &Lot{capacity: capacity, vehicles: nil}, nil
+	l := make([]*vehicle, capacity)
+	return &Lot{capacity: capacity, vehicles: l}, nil
 }
 
-func (l *Lot) Park(vehicleNumber string) (bool, error) {
+func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 	if vehicleNumber == "" {
-		return false, errors.New("vehicle number is mandatory to park")
+		return nil, errors.New("vehicle number is mandatory to park")
 	}
-	return true, nil
+	var lotId uint
+	for i := 0; i < len((*l).vehicles); i++ {
+		if (*l).vehicles[i] == nil {
+			lotId = uint(i + 1)
+			(*l).vehicles[i] = &vehicle{number: vehicleNumber, lotId: uint(i + 1)}
+			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
+		}
+		if (*l).vehicles[i].number == "" {
+			lotId = uint(i + 1)
+			(*l).vehicles[i] = &vehicle{number: vehicleNumber, lotId: uint(i + 1)}
+			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
+		}
+	}
+	return nil, errors.New("parking lot full")
 }
