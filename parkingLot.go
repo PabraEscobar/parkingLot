@@ -12,6 +12,13 @@ type Lot struct {
 	vehicles []*vehicle
 }
 
+func (l *Lot) IsSlotAvailable() (bool, error) {
+	if len(l.vehicles) == int(l.capacity) {
+		return false, errors.New("no slot is available")
+	}
+	return true, nil
+}
+
 func Newlot(capacity uint) (*Lot, error) {
 	if capacity == 0 {
 		return nil, errors.New("capacity can't be zero")

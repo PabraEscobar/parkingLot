@@ -32,3 +32,10 @@ func TestVehicleNumberCannotbeEmpty(t *testing.T) {
 	}
 }
 
+func TestCheckIfSlotAvailable(t *testing.T) {
+	l, _ := Newlot(2)
+	_, err := l.IsSlotAvailable()
+	if err != nil {
+		t.Errorf("Slot is available")
+	}
+}
