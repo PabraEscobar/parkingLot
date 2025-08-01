@@ -47,11 +47,6 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 			(*l).vehicles[i] = &vehicle{number: vehicleNumber, lotId: uint(i + 1)}
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
 		}
-		if (*l).vehicles[i].number == "" {
-			lotId = uint(i + 1)
-			(*l).vehicles[i] = &vehicle{number: vehicleNumber, lotId: uint(i + 1)}
-			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
-		}
 	}
 	return nil, errors.New("parking lot full")
 }
