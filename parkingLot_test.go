@@ -23,7 +23,7 @@ func TestCanMyCarBeParked(t *testing.T) {
 		t.Errorf("Vehicle should be parked")
 	}
 	if (*vehicle).lotId == uint(0) {
-		t.Errorf("slot id cannot be empty")
+		t.Errorf("slot id cannot be zero")
 	}
 }
 
@@ -52,5 +52,14 @@ func TestUnparkVehicleWhichIsNotParked(t *testing.T) {
 	_, err := l.Unpark("RJ19PA4141")
 	if err == nil {
 		t.Errorf("vehichle is not parked with these number")
+	}
+}
+
+func TestCarAlreadyParked(t *testing.T) {
+	l, _ := Newlot(5)
+	l.Park("RJ19MS1858")
+	_, err := l.Park("RJ19MS1858")
+	if err == nil {
+		t.Errorf("Car already parked can't be parked again")
 	}
 }
