@@ -81,3 +81,10 @@ func TestAvailablityNotificationforEmptyLot(t *testing.T) {
 		t.Errorf("parking lot is available")
 	}
 }
+
+func TestNewOwner(t *testing.T) {
+	_, err := NewOwner("RS Reddy")
+	if err != nil {
+		t.Errorf("owner should be created")
+	}
+}

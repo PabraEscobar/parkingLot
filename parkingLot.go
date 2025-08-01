@@ -12,6 +12,18 @@ type Lot struct {
 	vehicles []*vehicle
 }
 
+type Owner struct {
+	Name string
+	Lots []Lot
+}
+
+func NewOwner(name string) (*Owner, error) {
+	if name == "" {
+		return nil, errors.New("Owner name should not be empty")
+	}
+	return &Owner{Name: name}, nil
+}
+
 func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
 	if vehicleNumber == "" {
 		return nil, errors.New("vehicle number is manadatory to unpark the vehicle")
