@@ -77,7 +77,7 @@ func TestAvailablityNotificationForFullLot(t *testing.T) {
 	l.Park("TN39AD1232")
 	l.Park("RJ78DE1234")
 	res := l.AvailabilityNotification()
-	if res != "parking lot is full" {
+	if res != "notify owner that parking lot is full" {
 		t.Errorf("parking lot is full")
 	}
 }
@@ -86,7 +86,7 @@ func TestAvailablityNotificationforEmptyLot(t *testing.T) {
 	Owner, _ := NewOwner("Reddy")
 	l, _ := Owner.Newlot(5)
 	res := l.AvailabilityNotification()
-	if res != "parking lot is available" {
+	if res != "notify owner parking lot have space" {
 		t.Errorf("parking lot is available")
 	}
 }
@@ -102,7 +102,18 @@ func TestOwnerNotification(t *testing.T) {
 	Owner, _ := NewOwner("RS Reddy")
 	Owner.Newlot(5)
 	res := Owner.Lots[0].AvailabilityNotification()
-	if res != "parking lot is available" {
+	if res != "notify owner parking lot have space" {
 		t.Errorf("parking lot is available")
+	}
+}
+
+func TestParkingFullNotificationToOwner(t *testing.T) {
+	Owner, _ := NewOwner("Reddy")
+	l, _ := Owner.Newlot(2)
+	l.Park("TN39AD1232")
+	l.Park("RJ78DE1234")
+	res := l.AvailabilityNotification()
+	if res != "notify owner that parking lot is full" {
+		t.Errorf("parking lot is full")
 	}
 }

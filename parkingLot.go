@@ -64,7 +64,8 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 			return nil, errors.New("car already parked in parking lot")
 		}
 	}
-	return nil, errors.New("parking lot full")
+	status := l.AvailabilityNotification()
+	return nil, errors.New(status)
 }
 
 func (l *Lot) AvailabilityNotification() string {
@@ -75,7 +76,7 @@ func (l *Lot) AvailabilityNotification() string {
 		}
 	}
 	if counter == int(l.capacity) {
-		return "parking lot is full"
+		return "notify owner that parking lot is full"
 	}
-	return "parking lot is available"
+	return "notify owner parking lot have space"
 }
