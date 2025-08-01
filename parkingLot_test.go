@@ -97,3 +97,12 @@ func TestNewOwner(t *testing.T) {
 		t.Errorf("owner should be created")
 	}
 }
+
+func TestOwnerNotification(t *testing.T) {
+	Owner, _ := NewOwner("RS Reddy")
+	Owner.Newlot(5)
+	res := Owner.Lots[0].AvailabilityNotification()
+	if res != "parking lot is available" {
+		t.Errorf("parking lot is available")
+	}
+}

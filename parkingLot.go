@@ -45,6 +45,7 @@ func (o *Owner) Newlot(capacity uint) (*Lot, error) {
 		return nil, errors.New("capacity can't be zero")
 	}
 	l := make([]*vehicle, capacity)
+	o.Lots = append(o.Lots, Lot{capacity: capacity, vehicles: l})
 	return &Lot{capacity: capacity, vehicles: l}, nil
 }
 
