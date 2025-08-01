@@ -53,3 +53,16 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 	}
 	return nil, errors.New("parking lot full")
 }
+
+func (l *Lot) AvailabilityNotification() string {
+	counter := 0
+	for i := 0; i < len(l.vehicles); i++ {
+		if l.vehicles[i] != nil && l.vehicles[i].number != "" {
+			counter++
+		}
+	}
+	if counter == int(l.capacity) {
+		return "parking lot is full"
+	}
+	return "parking lot is available"
+}

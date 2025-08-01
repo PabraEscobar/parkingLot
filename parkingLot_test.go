@@ -63,3 +63,21 @@ func TestCarAlreadyParked(t *testing.T) {
 		t.Errorf("Car already parked can't be parked again")
 	}
 }
+
+func TestAvailablityNotificationForFullLot(t *testing.T) {
+	l, _ := Newlot(2)
+	l.Park("TN39AD1232")
+	l.Park("RJ78DE1234")
+	res := l.AvailabilityNotification()
+	if res != "parking lot is full" {
+		t.Errorf("parking lot is full")
+	}
+}
+
+func TestAvailablityNotificationforEmptyLot(t *testing.T) {
+	l, _ := Newlot(2)
+	res := l.AvailabilityNotification()
+	if res != "parking lot is available" {
+		t.Errorf("parking lot is available")
+	}
+}
