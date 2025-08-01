@@ -40,7 +40,7 @@ func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
 	return nil, errors.New("vehicle not parked in the parking lot with provided number")
 }
 
-func Newlot(capacity uint) (*Lot, error) {
+func (o *Owner) Newlot(capacity uint) (*Lot, error) {
 	if capacity == 0 {
 		return nil, errors.New("capacity can't be zero")
 	}
