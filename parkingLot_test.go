@@ -34,3 +34,23 @@ func TestVehicleNumberCannotbeEmpty(t *testing.T) {
 		t.Error("vehicle number cannot be empty")
 	}
 }
+
+func TestUnparkVehicle(t *testing.T) {
+	l, _ := Newlot(5)
+	l.Park("KA03T4567")
+	vehicle, err := l.Unpark("KA03T4567")
+	if err != nil {
+		t.Errorf("vehicle should be unparked")
+	}
+	if vehicle == nil {
+		t.Errorf("vehicle should be unparked")
+	}
+}
+
+func TestUnparkVehicleWhichIsNotParked(t *testing.T) {
+	l, _ := Newlot(5)
+	_, err := l.Unpark("RJ19PA4141")
+	if err == nil {
+		t.Errorf("vehichle is not parked with these number")
+	}
+}
