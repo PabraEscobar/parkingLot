@@ -3,24 +3,21 @@ package parking
 import "testing"
 
 func TestLotCreationWithCapacityFive(t *testing.T) {
-	Owner, _ := NewOwner("Reddy")
-	_, err := Owner.Newlot(5)
+	_, err := Newlot(5)
 	if err != nil {
 		t.Errorf("parking lot with capacity 5 should be created")
 	}
 }
 
 func TestLotShouldNotCreatedWithCapacityZero(t *testing.T) {
-	Owner, _ := NewOwner("Reddy")
-	_, err := Owner.Newlot(0)
+	_, err := Newlot(0)
 	if err == nil {
 		t.Errorf("parking lot should not be created with zero capacity")
 	}
 }
 
 func TestCanMyCarBeParked(t *testing.T) {
-	Owner, _ := NewOwner("Reddy")
-	l, _ := Owner.Newlot(5)
+	l, _ := Newlot(5)
 	vehicle, err := l.Park("KA03T4567")
 	if err != nil {
 		t.Errorf("Vehicle should be parked")
@@ -31,8 +28,7 @@ func TestCanMyCarBeParked(t *testing.T) {
 }
 
 func TestVehicleNumberCannotbeEmpty(t *testing.T) {
-	Owner, _ := NewOwner("Reddy")
-	l, _ := Owner.Newlot(5)
+	l, _ := Newlot(5)
 	_, err := l.Park("")
 	if err == nil {
 		t.Error("vehicle number cannot be empty")
@@ -40,8 +36,7 @@ func TestVehicleNumberCannotbeEmpty(t *testing.T) {
 }
 
 func TestUnparkVehicle(t *testing.T) {
-	Owner, _ := NewOwner("Reddy")
-	l, _ := Owner.Newlot(5)
+	l, _ := Newlot(5)
 	l.Park("KA03T4567")
 	vehicle, err := l.Unpark("KA03T4567")
 	if err != nil {
@@ -53,8 +48,7 @@ func TestUnparkVehicle(t *testing.T) {
 }
 
 func TestUnparkVehicleWhichIsNotParked(t *testing.T) {
-	Owner, _ := NewOwner("Reddy")
-	l, _ := Owner.Newlot(5)
+	l, _ := Newlot(5)
 	_, err := l.Unpark("RJ19PA4141")
 	if err == nil {
 		t.Errorf("vehichle is not parked with these number")
@@ -62,8 +56,7 @@ func TestUnparkVehicleWhichIsNotParked(t *testing.T) {
 }
 
 func TestCarAlreadyParked(t *testing.T) {
-	Owner, _ := NewOwner("Reddy")
-	l, _ := Owner.Newlot(5)
+	l, _ := Newlot(5)
 	l.Park("RJ19MS1858")
 	_, err := l.Park("RJ19MS1858")
 	if err == nil {
@@ -72,8 +65,7 @@ func TestCarAlreadyParked(t *testing.T) {
 }
 
 func TestAvailablityNotificationForFullLot(t *testing.T) {
-	Owner, _ := NewOwner("Reddy")
-	l, _ := Owner.Newlot(2)
+	l, _ := Newlot(2)
 	l.Park("TN39AD1232")
 	l.Park("RJ78DE1234")
 	res := l.AvailabilityNotification()
@@ -83,26 +75,10 @@ func TestAvailablityNotificationForFullLot(t *testing.T) {
 }
 
 func TestAvailablityNotificationforEmptyLot(t *testing.T) {
-	Owner, _ := NewOwner("Reddy")
-	l, _ := Owner.Newlot(5)
+	l, _ := Newlot(5)
 	res := l.AvailabilityNotification()
 	if res != "parking lot is available" {
 		t.Errorf("parking lot is available")
 	}
 }
 
-func TestNewOwner(t *testing.T) {
-	_, err := NewOwner("RS Reddy")
-	if err != nil {
-		t.Errorf("owner should be created")
-	}
-}
-
-func TestOwnerNotification(t *testing.T) {
-	Owner, _ := NewOwner("RS Reddy")
-	Owner.Newlot(5)
-	res := Owner.Lots[0].AvailabilityNotification()
-	if res != "parking lot is available" {
-		t.Errorf("parking lot is available")
-	}
-}
