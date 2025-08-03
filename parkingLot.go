@@ -8,13 +8,17 @@ type vehicle struct {
 }
 
 type Lot struct {
-	capacity uint
-	vehicles []*vehicle
+	capacity   uint
+	vehicles   []*vehicle
+	subscriber Notifier
 }
 
 type Owner struct {
 	Name string
 	Lots []Lot
+}
+type Notifier interface {
+	Notify(notification string)
 }
 
 func NewOwner(name string) (*Owner, error) {
@@ -34,6 +38,7 @@ func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
 			lotId = uint(i + 1)
 			l.vehicles[i].number = ""
 			l.vehicles[i] = nil
+			_ = l.AvailabilityNotification()
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
 		}
 	}
@@ -76,7 +81,9 @@ func (l *Lot) AvailabilityNotification() string {
 		}
 	}
 	if counter == int(l.capacity) {
+		(*l).subscriber.Notify("parking lot is full")
 		return "notify owner that parking lot is full"
 	}
+	(*l).subscriber.Notify("parking lot have space for parking")
 	return "notify owner parking lot have space"
 }
