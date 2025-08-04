@@ -7,11 +7,12 @@ type vehicle struct {
 	lotId  uint
 }
 
-type parkingStatus uint
+type ParkingStatus uint
 
 const (
-	parkingAvailable parkingStatus = iota
-	parkingFull
+	Unknown ParkingStatus = iota
+	ParkingAvailable
+	ParkingFull
 )
 
 type Lot struct {
@@ -21,7 +22,7 @@ type Lot struct {
 }
 
 type NotificationReceiver interface {
-	Notify(status parkingStatus)
+	Notify(status ParkingStatus)
 }
 
 func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
@@ -35,7 +36,7 @@ func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
 			l.vehicles[i].number = ""
 			l.vehicles[i] = nil
 			if int(lotId) == len((*l).vehicles) {
-				l.availabilityNotification(parkingAvailable)
+				l.availabilityNotification(ParkingAvailable)
 			}
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
 		}
@@ -61,7 +62,7 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 			lotId = uint(i + 1)
 			(*l).vehicles[i] = &vehicle{number: vehicleNumber, lotId: uint(i + 1)}
 			if int(lotId) == len((*l).vehicles) {
-				l.availabilityNotification(parkingFull)
+				l.availabilityNotification(ParkingFull)
 			}
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
 		}
@@ -72,6 +73,6 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 	return nil, errors.New("parking lot is full")
 }
 
-func (l *Lot) availabilityNotification(status parkingStatus) {
+func (l *Lot) availabilityNotification(status ParkingStatus) {
 	(*l).subscriber.Notify(status)
 }

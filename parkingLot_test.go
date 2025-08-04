@@ -71,8 +71,8 @@ type mockNotifier struct {
 	flag bool
 }
 
-func (m *mockNotifier) Notify(status parkingStatus) {
-	if status == 0 {
+func (m *mockNotifier) Notify(status ParkingStatus) {
+	if status == 1 {
 		fmt.Println("remove the board")
 		m.flag = false
 	} else {
