@@ -64,20 +64,47 @@ func TestCarAlreadyParked(t *testing.T) {
 	}
 }
 
+type mockNotifier struct {
+	flag bool
+}
+
+func (m *mockNotifier) Notify(notification string) {
+	m.flag = true
+}
+
 func TestAvailablityNotificationForFullLot(t *testing.T) {
 	l, _ := Newlot(2)
+	m := &mockNotifier{flag: false}
+	l.subscriber = m
 	l.Park("TN39AD1232")
 	l.Park("RJ78DE1234")
 	res := l.AvailabilityNotification()
-	if res != "parking lot is full" {
+	if res != "notify owner that parking lot is full" {
 		t.Errorf("parking lot is full")
 	}
 }
 
 func TestAvailablityNotificationforEmptyLot(t *testing.T) {
-	l, _ := Newlot(2)
+	l, _ := Newlot(5)
+	m := &mockNotifier{flag: false}
+	l.subscriber = m
 	res := l.AvailabilityNotification()
-	if res != "parking lot is available" {
+	if res != "notify owner that parking lot have space" {
 		t.Errorf("parking lot is available")
+	}
+}
+
+func TestNotificationMessageSendToSubscriber(t *testing.T) {
+	l, _ := Newlot(2)
+	m := &mockNotifier{flag: false}
+	l.subscriber = m
+	l.Park("TN39AD1232")
+	l.Park("RJ78DE1234")
+	res := l.AvailabilityNotification()
+	if res !="notify owner that parking lot is full" {
+		t.Errorf("parking lot is full")
+	}
+	if m.flag == false {
+		t.Errorf("owner is not notified")
 	}
 }
