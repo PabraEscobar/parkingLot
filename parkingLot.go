@@ -27,6 +27,9 @@ func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
 			lotId = uint(i + 1)
 			l.vehicles[i].number = ""
 			l.vehicles[i] = nil
+			if int(lotId) == len((*l).vehicles) {
+				l.AvailabilityNotification("parking lot is available")
+			}
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
 		}
 	}

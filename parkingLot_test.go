@@ -69,7 +69,7 @@ type mockNotifier struct {
 }
 
 func (m *mockNotifier) Notify(notification string) {
-	m.flag = true
+	m.flag = !m.flag
 }
 
 func TestAvailablityNotificationForFullLot(t *testing.T) {
@@ -102,6 +102,19 @@ func TestNotificationMessageSendToSubscriber(t *testing.T) {
 	l.Park("RJ78DE1234")
 
 	if m.flag == false {
+		t.Errorf("owner is not notified")
+	}
+}
+
+func TestNotificationSendtoSubcriberWhenParkingIsAvailable(t *testing.T) {
+	l, _ := Newlot(2)
+	m := &mockNotifier{flag: false}
+	l.subscriber = m
+	l.Park("TN39AD1232")
+	l.Park("RJ78DE1234")
+	l.Unpark("RJ78DE1234")
+
+	if m.flag == true {
 		t.Errorf("owner is not notified")
 	}
 }
