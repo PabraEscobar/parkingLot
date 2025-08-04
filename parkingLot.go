@@ -65,7 +65,6 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 	return nil, errors.New("parking lot is full")
 }
 
-func (l *Lot) AvailabilityNotification(message string) string {
+func (l *Lot) AvailabilityNotification(message string) {
 	(*l).subscriber.Notify(message)
-	return message
 }
