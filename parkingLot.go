@@ -28,7 +28,7 @@ func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
 			l.vehicles[i].number = ""
 			l.vehicles[i] = nil
 			if int(lotId) == len((*l).vehicles) {
-				l.AvailabilityNotification("parking lot is available")
+				l.availabilityNotification("parking lot is available")
 			}
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
 		}
@@ -54,7 +54,7 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 			lotId = uint(i + 1)
 			(*l).vehicles[i] = &vehicle{number: vehicleNumber, lotId: uint(i + 1)}
 			if int(lotId) == len((*l).vehicles) {
-				l.AvailabilityNotification("parking lot is full")
+				l.availabilityNotification("parking lot is full")
 			}
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
 		}
@@ -65,6 +65,6 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 	return nil, errors.New("parking lot is full")
 }
 
-func (l *Lot) AvailabilityNotification(message string) {
+func (l *Lot) availabilityNotification(message string) {
 	(*l).subscriber.Notify(message)
 }
