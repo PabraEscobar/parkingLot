@@ -10,10 +10,10 @@ type vehicle struct {
 type Lot struct {
 	capacity uint
 	vehicles []*vehicle
-	subscriber LotSpaceNotifier
+	subscriber NotificationReceiver
 }
 
-type LotSpaceNotifier interface {
+type NotificationReceiver interface {
 	Notify(notification string)
 }
 
