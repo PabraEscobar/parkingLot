@@ -50,14 +50,16 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 		if (*l).vehicles[i] == nil {
 			lotId = uint(i + 1)
 			(*l).vehicles[i] = &vehicle{number: vehicleNumber, lotId: uint(i + 1)}
+			if int(lotId) == len((*l).vehicles) {
+				l.AvailabilityNotification("parking lot is full")
+			}
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
 		}
 		if (*l).vehicles[i].number == vehicleNumber {
 			return nil, errors.New("car already parked in parking lot")
 		}
 	}
-	notificationMessage := l.AvailabilityNotification("parking lot is full")
-	return nil, errors.New(notificationMessage)
+	return nil, errors.New("parking lot is full")
 }
 
 func (l *Lot) AvailabilityNotification(message string) string {

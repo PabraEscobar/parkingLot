@@ -100,10 +100,7 @@ func TestNotificationMessageSendToSubscriber(t *testing.T) {
 	l.subscriber = m
 	l.Park("TN39AD1232")
 	l.Park("RJ78DE1234")
-	res := l.AvailabilityNotification("parking lot is full")
-	if res != "parking lot is full" {
-		t.Errorf("parking lot is full")
-	}
+
 	if m.flag == false {
 		t.Errorf("owner is not notified")
 	}
