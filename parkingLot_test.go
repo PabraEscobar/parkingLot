@@ -1,6 +1,9 @@
 package parking
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestLotCreationWithCapacityFive(t *testing.T) {
 	_, err := Newlot(5)
@@ -68,8 +71,14 @@ type mockNotifier struct {
 	flag bool
 }
 
-func (m *mockNotifier) Notify(notification string) {
-	m.flag = !m.flag
+func (m *mockNotifier) Notify(status parkingStatus) {
+	if status == 0 {
+		fmt.Println("remove the board")
+		m.flag = false
+	} else {
+		fmt.Println("put the sign that parking is full")
+		m.flag = true
+	}
 }
 
 func TestAvailablityNotificationForFullLot(t *testing.T) {
