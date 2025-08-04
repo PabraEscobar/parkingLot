@@ -16,12 +16,12 @@ const (
 )
 
 type Lot struct {
-	capacity uint
-	vehicles []*vehicle
-	subscriber NotificationReceiver
+	capacity   uint
+	vehicles   []*vehicle
+	subscriber ParkingStatusReceiver
 }
 
-type NotificationReceiver interface {
+type ParkingStatusReceiver interface {
 	Notify(status ParkingStatus)
 }
 
