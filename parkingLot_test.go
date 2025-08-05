@@ -72,7 +72,7 @@ type mockParkingFull struct {
 	receivedStatus parkingStatus
 }
 
-func (m *mockParkingFull) NotifyParkingFull() {
+func (m *mockParkingFull) ReceiveParkingFull() {
 	m.receivedStatus = parkingFull
 }
 
@@ -80,7 +80,7 @@ type mockParkingAvailable struct {
 	receivedStatus parkingStatus
 }
 
-func (m *mockParkingAvailable) NotifyParkingAvailable() {
+func (m *mockParkingAvailable) ReceiveParkingAvailable() {
 	m.receivedStatus = parkingAvailable
 }
 func TestNotifiedSubscriberThatParkingFullOfCapacityOne(t *testing.T) {
@@ -154,10 +154,10 @@ type mockOwner struct {
 	receivedStatus parkingStatus
 }
 
-func (m *mockOwner) NotifyParkingAvailable() {
+func (m *mockOwner) ReceiveParkingAvailable() {
 	m.receivedStatus = parkingAvailable
 }
-func (m *mockOwner) NotifyParkingFull() {
+func (m *mockOwner) ReceiveParkingFull() {
 	m.receivedStatus = parkingFull
 }
 
