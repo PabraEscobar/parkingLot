@@ -15,11 +15,11 @@ type Lot struct {
 }
 
 type ParkingAvailableReceiver interface {
-	NotifyParkingAvailable()
+	ParkingAvailableReceive()
 }
 
 type ParkingFullReceiver interface {
-	NotifyParkingFull()
+	ParkingFullReceive()
 }
 
 func (l *Lot) SubscribeParkingFullStatus(subscriber ParkingFullReceiver) {
@@ -43,7 +43,7 @@ func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
 			if int(lotId) == len((*l).vehicles) {
 				for j := 0; j < len(l.subscribersParkingAvailable); j++ {
 					if l.subscribersParkingAvailable[j] != nil {
-						l.subscribersParkingAvailable[j].NotifyParkingAvailable()
+						l.subscribersParkingAvailable[j].ParkingAvailableReceive()
 					}
 				}
 			}
@@ -73,7 +73,7 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 			if int(lotId) == len((*l).vehicles) {
 				for j := 0; j < len(l.subscribersParkingFull); j++ {
 					if l.subscribersParkingFull[j] != nil {
-						l.subscribersParkingFull[j].NotifyParkingFull()
+						l.subscribersParkingFull[j].ParkingFullReceive()
 					}
 				}
 			}
