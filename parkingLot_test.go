@@ -83,8 +83,8 @@ func (m *mockNotifier) Notify(status ParkingStatus) {
 func TestNotifiedSubscriberThatParkingFullOfCapacityOne(t *testing.T) {
 	parking, _ := Newlot(1)
 	mockSubscriber := &mockNotifier{}
-	parking.subscriber = mockSubscriber
-	vehicle:="TN39AD1232"
+	(parking).SubscribeParkingStatus(mockSubscriber)
+	vehicle := "TN39AD1232"
 	parking.Park(vehicle)
 	if mockSubscriber.receivedStatus != ParkingFull {
 		t.Errorf("When parking lot is full, parking lot should notify the owner that parking lot is full")
@@ -94,7 +94,7 @@ func TestNotifiedSubscriberThatParkingFullOfCapacityOne(t *testing.T) {
 func TestNotifiedSubscriberThatPakingFull(t *testing.T) {
 	parking, _ := Newlot(2)
 	mockSubscriber := &mockNotifier{}
-	parking.subscriber = mockSubscriber
+	(parking).SubscribeParkingStatus(mockSubscriber)
 	vehicle := "TN39AD1232"
 	anotherVehicle := "RJ78DE1234"
 	parking.Park(vehicle)
@@ -108,7 +108,7 @@ func TestNotifiedSubscriberThatPakingFull(t *testing.T) {
 func TestNotifiedSubscriberThatPakingAvailable(t *testing.T) {
 	parking, _ := Newlot(2)
 	mockSubscriber := &mockNotifier{}
-	parking.subscriber = mockSubscriber
+	(parking).SubscribeParkingStatus(mockSubscriber)
 	vehicle := "TN39AD1232"
 	anotherVehicle := "RJ78DE1234"
 	parking.Park(vehicle)
@@ -117,5 +117,43 @@ func TestNotifiedSubscriberThatPakingAvailable(t *testing.T) {
 
 	if mockSubscriber.receivedStatus != ParkingAvailable {
 		t.Errorf("owner is not notified")
+	}
+}
+
+func TestNotifiedSubscribersThatParkingFull(t *testing.T) {
+	parking, _ := Newlot(2)
+	subscriber1 := &mockNotifier{}
+	(parking).SubscribeParkingStatus(subscriber1)
+	subscriber2 := &mockNotifier{}
+	(parking).SubscribeParkingStatus(subscriber2)
+	vehicle := "TN39AD1232"
+	anotherVehicle := "RJ78DE1234"
+	parking.Park(vehicle)
+	parking.Park(anotherVehicle)
+
+	if subscriber1.receivedStatus != ParkingFull {
+		t.Errorf("subscriber1 is not notified that parking is full")
+	}
+	if subscriber2.receivedStatus != ParkingFull {
+		t.Errorf("subscriber2 is not notified that parking is full")
+	}
+}
+
+func TestNotifiedSubscribersThatParkingAvailable(t *testing.T) {
+	parking, _ := Newlot(2)
+	subscriber1 := &mockNotifier{}
+	(parking).SubscribeParkingStatus(subscriber1)
+	subscriber2 := &mockNotifier{}
+	(parking).SubscribeParkingStatus(subscriber2)
+	vehicle := "TN39AD1232"
+	anotherVehicle := "RJ78DE1234"
+	parking.Park(vehicle)
+	parking.Park(anotherVehicle)
+	parking.Unpark(anotherVehicle)
+	if subscriber1.receivedStatus != ParkingAvailable {
+		t.Errorf("subscriber1 is not notified that parking is available")
+	}
+	if subscriber2.receivedStatus != ParkingAvailable {
+		t.Errorf("subscriber2 is not notified that parking is available")
 	}
 }

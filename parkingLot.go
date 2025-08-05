@@ -16,13 +16,17 @@ const (
 )
 
 type Lot struct {
-	capacity   uint
-	vehicles   []*vehicle
-	subscriber ParkingStatusReceiver
+	capacity    uint
+	vehicles    []*vehicle
+	subscribers []ParkingStatusReceiver
 }
 
 type ParkingStatusReceiver interface {
 	Notify(status ParkingStatus)
+}
+
+func (l *Lot) SubscribeParkingStatus(subscriber ParkingStatusReceiver) {
+	l.subscribers = append(l.subscribers, subscriber)
 }
 
 func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
@@ -74,5 +78,9 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 }
 
 func (l *Lot) availabilityNotification(status ParkingStatus) {
-	(*l).subscriber.Notify(status)
+	for i := 0; i < len(l.subscribers); i++ {
+		if l.subscribers[i] != nil {
+			l.subscribers[i].Notify(status)
+		}
+	}
 }
