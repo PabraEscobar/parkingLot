@@ -69,19 +69,19 @@ func TestCarAlreadyParked(t *testing.T) {
 }
 
 type mockParkingFull struct {
-	receivedStatus ParkingStatus
+	receivedStatus parkingStatus
 }
 
-func (m *mockParkingFull) NotifyParkingFull(status ParkingStatus) {
-	m.receivedStatus = status
+func (m *mockParkingFull) NotifyParkingFull() {
+	m.receivedStatus = parkingFull
 }
 
 type mockParkingAvailable struct {
-	receivedStatus ParkingStatus
+	receivedStatus parkingStatus
 }
 
-func (m *mockParkingAvailable) NotifyParkingAvailable(status ParkingStatus) {
-	m.receivedStatus = status
+func (m *mockParkingAvailable) NotifyParkingAvailable() {
+	m.receivedStatus = parkingAvailable
 }
 func TestNotifiedSubscriberThatParkingFullOfCapacityOne(t *testing.T) {
 	parking, _ := Newlot(1)
@@ -89,7 +89,7 @@ func TestNotifiedSubscriberThatParkingFullOfCapacityOne(t *testing.T) {
 	(parking).SubscribeParkingFullStatus(mockSubscriber)
 	vehicle := "TN39AD1232"
 	parking.Park(vehicle)
-	if mockSubscriber.receivedStatus != ParkingFull {
+	if mockSubscriber.receivedStatus != parkingFull {
 		t.Errorf("When parking lot is full, parking lot should notify the owner that parking lot is full")
 	}
 }
@@ -103,7 +103,7 @@ func TestNotifiedSubscriberThatPakingFull(t *testing.T) {
 	parking.Park(vehicle)
 	parking.Park(anotherVehicle)
 
-	if mockSubscriber.receivedStatus != ParkingFull {
+	if mockSubscriber.receivedStatus != parkingFull {
 		t.Errorf("owner is not notified")
 	}
 }
@@ -118,7 +118,7 @@ func TestNotifiedSubscriberThatParkingAvailable(t *testing.T) {
 	parking.Park(anotherVehicle)
 	parking.Unpark(anotherVehicle)
 
-	if mockSubscriber.receivedStatus != ParkingAvailable {
+	if mockSubscriber.receivedStatus != parkingAvailable {
 		t.Errorf("owner is not notified")
 	}
 }
@@ -134,23 +134,31 @@ func TestNotifiedSubscribersThatParkingFull(t *testing.T) {
 	parking.Park(vehicle)
 	parking.Park(anotherVehicle)
 
-	if subscriber1.receivedStatus != ParkingFull {
+	if subscriber1.receivedStatus != parkingFull {
 		t.Errorf("subscriber1 is not notified that parking is full")
 	}
-	if subscriber2.receivedStatus != ParkingFull {
+	if subscriber2.receivedStatus != parkingFull {
 		t.Errorf("subscriber2 is not notified that parking is full")
 	}
 }
 
+type parkingStatus uint
+
+const (
+	unknown parkingStatus = iota
+	parkingAvailable
+	parkingFull
+)
+
 type mockOwner struct {
-	receivedStatus ParkingStatus
+	receivedStatus parkingStatus
 }
 
-func (m *mockOwner) NotifyParkingAvailable(status ParkingStatus) {
-	m.receivedStatus = status
+func (m *mockOwner) NotifyParkingAvailable() {
+	m.receivedStatus = parkingAvailable
 }
-func (m *mockOwner) NotifyParkingFull(status ParkingStatus) {
-	m.receivedStatus = status
+func (m *mockOwner) NotifyParkingFull() {
+	m.receivedStatus = parkingFull
 }
 
 func TestOnlyNotifiedToOwnerThatParkingAvailable(t *testing.T) {
@@ -162,11 +170,11 @@ func TestOnlyNotifiedToOwnerThatParkingAvailable(t *testing.T) {
 	anotherVehicle := "RJ78DE1234"
 	parking.Park(vehicle)
 	parking.Park(anotherVehicle)
-	if owner.receivedStatus != ParkingFull {
+	if owner.receivedStatus != parkingFull {
 		t.Errorf("owner is not notified that parking is Full")
 	}
 	parking.Unpark(anotherVehicle)
-	if owner.receivedStatus != ParkingAvailable {
+	if owner.receivedStatus != parkingAvailable {
 		t.Errorf("owner is not notified that parking is available")
 	}
 }

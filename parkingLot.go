@@ -7,14 +7,6 @@ type vehicle struct {
 	lotId  uint
 }
 
-type ParkingStatus uint
-
-const (
-	Unknown ParkingStatus = iota
-	ParkingAvailable
-	ParkingFull
-)
-
 type Lot struct {
 	capacity                    uint
 	vehicles                    []*vehicle
@@ -23,11 +15,11 @@ type Lot struct {
 }
 
 type ParkingAvailableReceiver interface {
-	NotifyParkingAvailable(status ParkingStatus)
+	NotifyParkingAvailable()
 }
 
 type ParkingFullReceiver interface {
-	NotifyParkingFull(status ParkingStatus)
+	NotifyParkingFull()
 }
 
 func (l *Lot) SubscribeParkingFullStatus(subscriber ParkingFullReceiver) {
@@ -49,7 +41,11 @@ func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
 			l.vehicles[i].number = ""
 			l.vehicles[i] = nil
 			if int(lotId) == len((*l).vehicles) {
-				l.availabilityNotification(ParkingAvailable)
+				for j := 0; j < len(l.subscribersParkingAvailable); j++ {
+					if l.subscribersParkingAvailable[j] != nil {
+						l.subscribersParkingAvailable[j].NotifyParkingAvailable()
+					}
+				}
 			}
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
 		}
@@ -75,7 +71,11 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 			lotId = uint(i + 1)
 			(*l).vehicles[i] = &vehicle{number: vehicleNumber, lotId: uint(i + 1)}
 			if int(lotId) == len((*l).vehicles) {
-				l.availabilityNotification(ParkingFull)
+				for j := 0; j < len(l.subscribersParkingFull); j++ {
+					if l.subscribersParkingFull[j] != nil {
+						l.subscribersParkingFull[j].NotifyParkingFull()
+					}
+				}
 			}
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
 		}
@@ -84,20 +84,4 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 		}
 	}
 	return nil, errors.New("parking lot is full")
-}
-
-func (l *Lot) availabilityNotification(status ParkingStatus) {
-	if status == ParkingFull {
-		for i := 0; i < len(l.subscribersParkingFull); i++ {
-			if l.subscribersParkingFull[i] != nil {
-				l.subscribersParkingFull[i].NotifyParkingFull(status)
-			}
-		}
-		return
-	}
-	for i := 0; i < len(l.subscribersParkingAvailable); i++ {
-		if l.subscribersParkingAvailable[i] != nil {
-			l.subscribersParkingAvailable[i].NotifyParkingAvailable(status)
-		}
-	}
 }
