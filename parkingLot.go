@@ -8,14 +8,21 @@ type vehicle struct {
 }
 
 type Lot struct {
-	capacity                    uint
-	vehicles                    []*vehicle
-	subscribersParkingFull      []ParkingFullReceiver
-	subscribersParkingAvailable []ParkingAvailableReceiver
+	capacity                uint
+	vehicles                []*vehicle
+	subscribersParkingFull  []ParkingFullReceiver
+	subscriberParkingStatus ParkingStatusReceiver
 }
+type ParkingStatus uint
 
-type ParkingAvailableReceiver interface {
-	ParkingAvailableReceive()
+const (
+	Unknown ParkingStatus = iota
+	ParkingAvailable
+	ParkingFull
+)
+
+type ParkingStatusReceiver interface {
+	ParkingStatusReceive(status ParkingStatus)
 }
 
 type ParkingFullReceiver interface {
@@ -24,10 +31,6 @@ type ParkingFullReceiver interface {
 
 func (l *Lot) SubscribeParkingFullStatus(subscriber ParkingFullReceiver) {
 	l.subscribersParkingFull = append(l.subscribersParkingFull, subscriber)
-}
-
-func (l *Lot) SubscribeParkingAvailableStatus(subscriber ParkingAvailableReceiver) {
-	l.subscribersParkingAvailable = append(l.subscribersParkingAvailable, subscriber)
 }
 
 func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
@@ -41,11 +44,7 @@ func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
 			l.vehicles[i].number = ""
 			l.vehicles[i] = nil
 			if int(lotId) == len((*l).vehicles) {
-				for j := 0; j < len(l.subscribersParkingAvailable); j++ {
-					if l.subscribersParkingAvailable[j] != nil {
-						l.subscribersParkingAvailable[j].ParkingAvailableReceive()
-					}
-				}
+				l.subscriberParkingStatus.ParkingStatusReceive(ParkingAvailable)
 			}
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
 		}
@@ -75,6 +74,9 @@ func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
 					if l.subscribersParkingFull[j] != nil {
 						l.subscribersParkingFull[j].ParkingFullReceive()
 					}
+				}
+				if l.subscriberParkingStatus != nil {
+					l.subscriberParkingStatus.ParkingStatusReceive(ParkingFull)
 				}
 			}
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
