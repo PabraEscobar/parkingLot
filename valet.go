@@ -46,5 +46,17 @@ func (a *Attendant) Park(vehicleNumber string) (*vehicle, error) {
 }
 
 func (a *Attendant) Unpark(vehicleNumber string) (*vehicle, error) {
-	return a.lots[0].unpark(vehicleNumber)
+	for lot := 0; lot < len(a.lots); lot++ {
+		v, err := a.lots[lot].unpark(vehicleNumber)
+		if err != nil {
+			if errors.Is(err, ErrVehicleNotParkedInThisLot) {
+				continue
+			} else {
+				return nil, errors.New("attendent is unable to unpark the vehicle")
+			}
+		} else {
+			return v, nil
+		}
+	}
+	return nil, errors.New("vehicle is not parked in the parking with the provided number")
 }

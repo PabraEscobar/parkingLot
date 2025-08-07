@@ -3,6 +3,7 @@ package parking
 import "errors"
 
 var ErrParkingLotFull = errors.New("parking lot is full")
+var ErrVehicleNotParkedInThisLot = errors.New("vehicle not parked in the parking lot with provided number")
 
 type vehicle struct {
 	number string
@@ -57,7 +58,7 @@ func (l *lot) unpark(vehicleNumber string) (*vehicle, error) {
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
 		}
 	}
-	return nil, errors.New("vehicle not parked in the parking lot with provided number")
+	return nil, ErrVehicleNotParkedInThisLot
 }
 
 func Newlot(capacity uint) (*lot, error) {
