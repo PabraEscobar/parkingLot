@@ -37,13 +37,19 @@ func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
 	if vehicleNumber == "" {
 		return nil, errors.New("vehicle number is manadatory to unpark the vehicle")
 	}
+	counter := 0
+	for i := 0; i < len(l.vehicles); i++ {
+		if l.vehicles[i] != nil {
+			counter++
+		}
+	}
 	var lotId uint
 	for i := 0; i < len(l.vehicles); i++ {
 		if l.vehicles[i] != nil && l.vehicles[i].number == vehicleNumber {
 			lotId = uint(i + 1)
 			l.vehicles[i].number = ""
 			l.vehicles[i] = nil
-			if int(lotId) == len((*l).vehicles) {
+			if counter == int(l.capacity) {
 				l.subscriberParkingStatus.ParkingStatusReceive(ParkingAvailable)
 			}
 			return &vehicle{number: vehicleNumber, lotId: lotId}, nil

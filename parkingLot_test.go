@@ -158,3 +158,19 @@ func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatus(t *t
 		t.Errorf("owner is not notified")
 	}
 }
+
+func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatusEdgeCase(t *testing.T) {
+	parking, _ := Newlot(2)
+	owner := &mockOwner{}
+	parking.subscriberParkingStatus = owner
+	vehicle := "TN39AD1232"
+	anotherVehicle := "RJ78DE1234"
+
+	parking.Park(vehicle)
+	parking.Park(anotherVehicle)
+	parking.Unpark(vehicle)
+
+	if owner.receivedStatus != ParkingAvailable {
+		t.Errorf("owner is not notified")
+	}
+}
