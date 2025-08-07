@@ -104,3 +104,24 @@ func TestAttendantCanUnparkTheCarFromAnyParkingLot(t *testing.T) {
 		t.Errorf("attendant should unpark the car which is parked in parking lot")
 	}
 }
+
+func TestAttendantReceiveNotificationFromMultiPleLots(t *testing.T) {
+	lot, _ := Newlot(1)
+	anotherLot, _ := Newlot(1)
+	attendant := NewAttendant()
+	lot.SubscribeParkingFullStatus(attendant)
+	anotherLot.SubscribeParkingFullStatus(attendant)
+	attendant.AddParkingLot(lot)
+	attendant.AddParkingLot(anotherLot)
+	vehicle := "KA03FG2345"
+	anotherVehicle := "KA02FG4567"
+	attendant.Park(vehicle)
+	if attendant.status != ParkingFull {
+		t.Errorf("status is not received from lot one to attendant")
+	}
+	attendant.status = Unknown
+	attendant.Park(anotherVehicle)
+	if attendant.status != ParkingFull {
+		t.Errorf("status is not received from second lot to attendant")
+	}
+}
