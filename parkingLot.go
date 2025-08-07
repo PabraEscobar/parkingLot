@@ -7,7 +7,7 @@ type vehicle struct {
 	lotId  uint
 }
 
-type Lot struct {
+type lot struct {
 	capacity                uint
 	vehicles                []*vehicle
 	subscribersParkingFull  []ParkingFullReceiver
@@ -29,11 +29,11 @@ type ParkingFullReceiver interface {
 	ParkingFullReceive()
 }
 
-func (l *Lot) SubscribeParkingFullStatus(subscriber ParkingFullReceiver) {
+func (l *lot) SubscribeParkingFullStatus(subscriber ParkingFullReceiver) {
 	l.subscribersParkingFull = append(l.subscribersParkingFull, subscriber)
 }
 
-func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
+func (l *lot) unpark(vehicleNumber string) (*vehicle, error) {
 	if vehicleNumber == "" {
 		return nil, errors.New("vehicle number is manadatory to unpark the vehicle")
 	}
@@ -58,15 +58,15 @@ func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
 	return nil, errors.New("vehicle not parked in the parking lot with provided number")
 }
 
-func Newlot(capacity uint) (*Lot, error) {
+func Newlot(capacity uint) (*lot, error) {
 	if capacity == 0 {
 		return nil, errors.New("capacity can't be zero")
 	}
 	l := make([]*vehicle, capacity)
-	return &Lot{capacity: capacity, vehicles: l}, nil
+	return &lot{capacity: capacity, vehicles: l}, nil
 }
 
-func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
+func (l *lot) park(vehicleNumber string) (*vehicle, error) {
 	if vehicleNumber == "" {
 		return nil, errors.New("vehicle number is mandatory to park")
 	}

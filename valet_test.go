@@ -15,7 +15,7 @@ func TestAttendantReceiveNotificationParkingFull(t *testing.T) {
 	attendant.AddParkingLot(lot)
 	lot.SubscribeParkingFullStatus(attendant)
 	vehicle := "KA03FG2345"
-	attendant.lots[0].Park(vehicle)
+	attendant.lots[0].park(vehicle)
 	if attendant.status != ParkingFull {
 		t.Errorf("attendant should be notified when parking is full")
 	}

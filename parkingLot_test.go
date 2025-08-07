@@ -20,7 +20,7 @@ func TestLotShouldNotCreatedWithCapacityZero(t *testing.T) {
 
 func TestCanMyCarBeParked(t *testing.T) {
 	parking, _ := Newlot(5)
-	vehicle, err := parking.Park("KA03T4567")
+	vehicle, err := parking.park("KA03T4567")
 	if err != nil {
 		t.Errorf("Vehicle should be parked")
 	}
@@ -31,7 +31,7 @@ func TestCanMyCarBeParked(t *testing.T) {
 
 func TestVehicleNumberCannotbeEmpty(t *testing.T) {
 	parking, _ := Newlot(5)
-	_, err := parking.Park("")
+	_, err := parking.park("")
 	if err == nil {
 		t.Error("vehicle number cannot be empty")
 	}
@@ -40,8 +40,8 @@ func TestVehicleNumberCannotbeEmpty(t *testing.T) {
 func TestUnparkVehicle(t *testing.T) {
 	parking, _ := Newlot(5)
 	vehicle := "KA03T4567"
-	parking.Park(vehicle)
-	vehicleUnparked, err := parking.Unpark(vehicle)
+	parking.park(vehicle)
+	vehicleUnparked, err := parking.unpark(vehicle)
 	if err != nil {
 		t.Errorf("vehicle should be unparked")
 	}
@@ -53,7 +53,7 @@ func TestUnparkVehicle(t *testing.T) {
 func TestUnparkVehicleWhichIsNotParked(t *testing.T) {
 	parking, _ := Newlot(5)
 	vehicle := "KA03T4567"
-	_, err := parking.Unpark(vehicle)
+	_, err := parking.unpark(vehicle)
 	if err == nil {
 		t.Errorf("vehichle is not parked with these number")
 	}
@@ -61,8 +61,8 @@ func TestUnparkVehicleWhichIsNotParked(t *testing.T) {
 
 func TestCarAlreadyParked(t *testing.T) {
 	l, _ := Newlot(5)
-	l.Park("RJ19MS1858")
-	_, err := l.Park("RJ19MS1858")
+	l.park("RJ19MS1858")
+	_, err := l.park("RJ19MS1858")
 	if err == nil {
 		t.Errorf("Car already parked can't be parked again")
 	}
@@ -81,7 +81,7 @@ func TestNotifiedSubscriberThatParkingFullOfCapacityOne(t *testing.T) {
 	mockSubscriber := &mockParkingFull{}
 	(parking).SubscribeParkingFullStatus(mockSubscriber)
 	vehicle := "TN39AD1232"
-	parking.Park(vehicle)
+	parking.park(vehicle)
 	if mockSubscriber.receivedStatus != ParkingFull {
 		t.Errorf("When parking lot is full, parking lot should notify the owner that parking lot is full")
 	}
@@ -93,8 +93,8 @@ func TestNotifiedSubscriberThatPakingFull(t *testing.T) {
 	(parking).SubscribeParkingFullStatus(mockSubscriber)
 	vehicle := "TN39AD1232"
 	anotherVehicle := "RJ78DE1234"
-	parking.Park(vehicle)
-	parking.Park(anotherVehicle)
+	parking.park(vehicle)
+	parking.park(anotherVehicle)
 
 	if mockSubscriber.receivedStatus != ParkingFull {
 		t.Errorf("owner is not notified")
@@ -108,8 +108,8 @@ func TestNotifiedSubscribersThatParkingFull(t *testing.T) {
 	(parking).SubscribeParkingFullStatus(subscriber2)
 	vehicle := "TN39AD1232"
 	anotherVehicle := "RJ78DE1234"
-	parking.Park(vehicle)
-	parking.Park(anotherVehicle)
+	parking.park(vehicle)
+	parking.park(anotherVehicle)
 
 	if subscriber1.receivedStatus != ParkingFull {
 		t.Errorf("subscriber1 is not notified that parking is full")
@@ -133,12 +133,12 @@ func TestOnlyNotifiedToOwnerThatParkingAvailableAndFull(t *testing.T) {
 	(parking).subscriberParkingStatus = owner
 	vehicle := "TN39AD1232"
 	anotherVehicle := "RJ78DE1234"
-	parking.Park(vehicle)
-	parking.Park(anotherVehicle)
+	parking.park(vehicle)
+	parking.park(anotherVehicle)
 	if owner.receivedStatus != ParkingFull {
 		t.Errorf("owner is not notified that parking is Full")
 	}
-	parking.Unpark(anotherVehicle)
+	parking.unpark(anotherVehicle)
 	if owner.receivedStatus != ParkingAvailable {
 		t.Errorf("owner is not notified that parking is available")
 	}
@@ -150,9 +150,9 @@ func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatus(t *t
 	parking.subscriberParkingStatus = owner
 	vehicle := "TN39AD1232"
 	anotherVehicle := "RJ78DE1234"
-	parking.Park(vehicle)
-	parking.Park(anotherVehicle)
-	parking.Unpark(anotherVehicle)
+	parking.park(vehicle)
+	parking.park(anotherVehicle)
+	parking.unpark(anotherVehicle)
 
 	if owner.receivedStatus != ParkingAvailable {
 		t.Errorf("owner is not notified")
@@ -166,9 +166,9 @@ func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatusEdgeC
 	vehicle := "TN39AD1232"
 	anotherVehicle := "RJ78DE1234"
 
-	parking.Park(vehicle)
-	parking.Park(anotherVehicle)
-	parking.Unpark(vehicle)
+	parking.park(vehicle)
+	parking.park(anotherVehicle)
+	parking.unpark(vehicle)
 
 	if owner.receivedStatus != ParkingAvailable {
 		t.Errorf("owner is not notified")

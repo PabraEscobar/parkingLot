@@ -2,35 +2,35 @@ package parking
 
 import "errors"
 
-type attendant struct {
+type Attendant struct {
 	status ParkingStatus
-	lots   []ParkingLot
+	lots   []parkingLot
 }
 
-type ParkingLot interface {
-	Park(vehicleNumber string) (*vehicle, error)
-	Unpark(vehicleNumber string) (*vehicle, error)
+type parkingLot interface {
+	park(vehicleNumber string) (*vehicle, error)
+	unpark(vehicleNumber string) (*vehicle, error)
 }
 
-func (a *attendant) AddParkingLot(lot ParkingLot) {
+func (a *Attendant) AddParkingLot(lot parkingLot) {
 	a.lots = append(a.lots, lot)
 }
 
-func NewAttendant() *attendant {
-	return &attendant{}
+func NewAttendant() *Attendant {
+	return &Attendant{}
 }
 
-func (a *attendant) ParkingFullReceive() {
+func (a *Attendant) ParkingFullReceive() {
 	a.status = ParkingFull
 }
 
-func (a *attendant) Park(vehicleNumber string) (*vehicle, error) {
+func (a *Attendant) Park(vehicleNumber string) (*vehicle, error) {
 	if a.status != ParkingFull {
-		return a.lots[0].Park(vehicleNumber)
+		return a.lots[0].park(vehicleNumber)
 	}
 	return nil, errors.New("attendant cannot park the vehicle , parking lot is full")
 }
 
-func (a *attendant) Unpark(vehicleNumber string) (*vehicle, error) {
-	return a.lots[0].Unpark(vehicleNumber)
+func (a *Attendant) Unpark(vehicleNumber string) (*vehicle, error) {
+	return a.lots[0].unpark(vehicleNumber)
 }
