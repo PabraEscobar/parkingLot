@@ -51,3 +51,15 @@ func TestAttendantCannotParkTheVehicleWhenParkingFull(t *testing.T) {
 		t.Errorf("attendant cannot park the vehicle when the parking is full")
 	}
 }
+
+func TestAttendantCanUnparkTheVehicle(t *testing.T) {
+	lot, _ := Newlot(2)
+	attendant, _ := NewAttendant(lot)
+	lot.SubscribeParkingFullStatus(attendant)
+	vehicle := "KA03FG2345"
+	attendant.Park(vehicle)
+	_, err := attendant.Unpark(vehicle)
+	if err != nil {
+		t.Errorf("attendant should unpark the vehicle")
+	}
+}

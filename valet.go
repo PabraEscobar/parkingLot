@@ -29,3 +29,7 @@ func (a *attendant) Park(vehicleNumber string) (*vehicle, error) {
 	}
 	return nil, errors.New("attendant cannot park the vehicle , parking lot is full")
 }
+
+func (a *attendant) Unpark(vehicleNumber string) (*vehicle, error) {
+	return a.lot.Unpark(vehicleNumber)
+}
