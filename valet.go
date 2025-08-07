@@ -3,7 +3,8 @@ package parking
 import "errors"
 
 type attendant struct {
-	lot ParkingLot
+	status ParkingStatus
+	lot    ParkingLot
 }
 
 type ParkingLot interface {
@@ -16,4 +17,8 @@ func NewAttendant(lot ParkingLot) (*attendant, error) {
 		return nil, errors.New("attendant does not exist without parking lot")
 	}
 	return &attendant{lot: lot}, nil
+}
+
+func (a *attendant) ParkingFullReceive() {
+	a.status = ParkingFull
 }

@@ -16,3 +16,14 @@ func TestNewAttendantCannotExistWithNilLot(t *testing.T) {
 		t.Errorf("Attendant should not exist without the parking lot")
 	}
 }
+
+func TestAttendantReceiveNotificationParkingFull(t *testing.T) {
+	lot, _ := Newlot(1)
+	attendant, _ := NewAttendant(lot)
+	lot.SubscribeParkingFullStatus(attendant)
+	vehicle := "KA03FG2345"
+	attendant.lot.Park(vehicle)
+	if attendant.status != ParkingFull {
+		t.Errorf("attendant should be notified when parking is full")
+	}
+}
