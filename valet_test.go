@@ -70,3 +70,21 @@ func TestAttendentCanManageMultipleLots(t *testing.T) {
 		t.Errorf("Attendant should be able to manage multiple lots")
 	}
 }
+
+func TestAttendantCanParkInNextLotWhenOneBecomesFull(t *testing.T) {
+	lot, _ := Newlot(1)
+	anotherLot, _ := Newlot(2)
+	attendant := NewAttendant()
+	attendant.AddParkingLot(lot)
+	attendant.AddParkingLot(anotherLot)
+	vehicle := "KA03FG2345"
+	anotherVehicle := "KA02FG4567"
+	_, err := attendant.Park(vehicle)
+	if err != nil {
+		t.Errorf("attendant should able to park the vehicle when there is space available")
+	}
+	_, err = attendant.Park(anotherVehicle)
+	if err != nil {
+		t.Errorf("attendant should able to park the vehicle in next lot when first is full")
+	}
+}

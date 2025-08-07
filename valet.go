@@ -25,8 +25,22 @@ func (a *Attendant) ParkingFullReceive() {
 }
 
 func (a *Attendant) Park(vehicleNumber string) (*vehicle, error) {
-	if a.status != ParkingFull {
-		return a.lots[0].park(vehicleNumber)
+	for lot := 0; lot < len(a.lots); lot++ {
+		if a.status != ParkingFull {
+			v, err := a.lots[lot].park(vehicleNumber)
+			if err != nil {
+				if errors.Is(err, ErrParkingLotFull) {
+					continue
+				} else {
+					return nil, errors.New("unable to park the vehicle")
+				}
+			} else {
+				return v, nil
+			}
+		} else {
+			a.status = ParkingAvailable
+			continue
+		}
 	}
 	return nil, errors.New("attendant cannot park the vehicle , parking lot is full")
 }

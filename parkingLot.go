@@ -2,6 +2,8 @@ package parking
 
 import "errors"
 
+var ErrParkingLotFull = errors.New("parking lot is full")
+
 type vehicle struct {
 	number string
 	lotId  uint
@@ -91,5 +93,5 @@ func (l *lot) park(vehicleNumber string) (*vehicle, error) {
 			return nil, errors.New("car already parked in parking lot")
 		}
 	}
-	return nil, errors.New("parking lot is full")
+	return nil, ErrParkingLotFull
 }
