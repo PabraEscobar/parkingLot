@@ -27,3 +27,27 @@ func TestAttendantReceiveNotificationParkingFull(t *testing.T) {
 		t.Errorf("attendant should be notified when parking is full")
 	}
 }
+
+func TestAttendantCanParkTheVehicleWhenParkingIsNotFull(t *testing.T) {
+	lot, _ := Newlot(1)
+	attendant, _ := NewAttendant(lot)
+	lot.SubscribeParkingFullStatus(attendant)
+	vehicle := "KA03FG2345"
+	_, err := attendant.Park(vehicle)
+	if err != nil {
+		t.Errorf("attendant can park the vehicle")
+	}
+}
+
+func TestAttendantCannotParkTheVehicleWhenParkingFull(t *testing.T) {
+	lot, _ := Newlot(1)
+	attendant, _ := NewAttendant(lot)
+	lot.SubscribeParkingFullStatus(attendant)
+	vehicle := "KA03FG2345"
+	anotherVehicle := "KA02FG4567"
+	attendant.Park(vehicle)
+	_, err := attendant.Park(anotherVehicle)
+	if err == nil {
+		t.Errorf("attendant cannot park the vehicle when the parking is full")
+	}
+}
