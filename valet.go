@@ -4,7 +4,7 @@ import "errors"
 
 type attendant struct {
 	status ParkingStatus
-	lot    ParkingLot
+	lots   []ParkingLot
 }
 
 type ParkingLot interface {
@@ -12,11 +12,12 @@ type ParkingLot interface {
 	Unpark(vehicleNumber string) (*vehicle, error)
 }
 
-func NewAttendant(lot ParkingLot) (*attendant, error) {
-	if lot == nil {
-		return nil, errors.New("attendant does not exist without parking lot")
-	}
-	return &attendant{lot: lot}, nil
+func (a *attendant) AddParkingLot(lot ParkingLot) {
+	a.lots = append(a.lots, lot)
+}
+
+func NewAttendant() *attendant {
+	return &attendant{}
 }
 
 func (a *attendant) ParkingFullReceive() {
@@ -25,11 +26,11 @@ func (a *attendant) ParkingFullReceive() {
 
 func (a *attendant) Park(vehicleNumber string) (*vehicle, error) {
 	if a.status != ParkingFull {
-		return a.lot.Park(vehicleNumber)
+		return a.lots[0].Park(vehicleNumber)
 	}
 	return nil, errors.New("attendant cannot park the vehicle , parking lot is full")
 }
 
 func (a *attendant) Unpark(vehicleNumber string) (*vehicle, error) {
-	return a.lot.Unpark(vehicleNumber)
+	return a.lots[0].Unpark(vehicleNumber)
 }

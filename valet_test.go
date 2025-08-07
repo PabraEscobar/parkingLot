@@ -3,26 +3,19 @@ package parking
 import "testing"
 
 func TestNewAttendant(t *testing.T) {
-	lot, _ := Newlot(2)
-	_, err := NewAttendant(lot)
-	if err != nil {
-		t.Errorf("Attendant should be exist with parking lot")
-	}
-}
-
-func TestNewAttendantCannotExistWithNilLot(t *testing.T) {
-	_, err := NewAttendant(nil)
-	if err == nil {
-		t.Errorf("Attendant should not exist without the parking lot")
+	attendant := NewAttendant()
+	if attendant == nil {
+		t.Errorf("Attendant should be exist")
 	}
 }
 
 func TestAttendantReceiveNotificationParkingFull(t *testing.T) {
 	lot, _ := Newlot(1)
-	attendant, _ := NewAttendant(lot)
+	attendant := NewAttendant()
+	attendant.AddParkingLot(lot)
 	lot.SubscribeParkingFullStatus(attendant)
 	vehicle := "KA03FG2345"
-	attendant.lot.Park(vehicle)
+	attendant.lots[0].Park(vehicle)
 	if attendant.status != ParkingFull {
 		t.Errorf("attendant should be notified when parking is full")
 	}
@@ -30,7 +23,8 @@ func TestAttendantReceiveNotificationParkingFull(t *testing.T) {
 
 func TestAttendantCanParkTheVehicleWhenParkingIsNotFull(t *testing.T) {
 	lot, _ := Newlot(1)
-	attendant, _ := NewAttendant(lot)
+	attendant := NewAttendant()
+	attendant.AddParkingLot(lot)
 	lot.SubscribeParkingFullStatus(attendant)
 	vehicle := "KA03FG2345"
 	_, err := attendant.Park(vehicle)
@@ -41,7 +35,8 @@ func TestAttendantCanParkTheVehicleWhenParkingIsNotFull(t *testing.T) {
 
 func TestAttendantCannotParkTheVehicleWhenParkingFull(t *testing.T) {
 	lot, _ := Newlot(1)
-	attendant, _ := NewAttendant(lot)
+	attendant := NewAttendant()
+	attendant.AddParkingLot(lot)
 	lot.SubscribeParkingFullStatus(attendant)
 	vehicle := "KA03FG2345"
 	anotherVehicle := "KA02FG4567"
@@ -54,12 +49,24 @@ func TestAttendantCannotParkTheVehicleWhenParkingFull(t *testing.T) {
 
 func TestAttendantCanUnparkTheVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
+	attendant := NewAttendant()
+	attendant.AddParkingLot(lot)
 	lot.SubscribeParkingFullStatus(attendant)
 	vehicle := "KA03FG2345"
 	attendant.Park(vehicle)
 	_, err := attendant.Unpark(vehicle)
 	if err != nil {
 		t.Errorf("attendant should unpark the vehicle")
+	}
+}
+
+func TestAttendentCanManageMultipleLots(t *testing.T) {
+	lot, _ := Newlot(1)
+	anotherLot, _ := Newlot(2)
+	attendant := NewAttendant()
+	attendant.AddParkingLot(lot)
+	attendant.AddParkingLot(anotherLot)
+	if len(attendant.lots) != 2 {
+		t.Errorf("Attendant should be able to manage multiple lots")
 	}
 }
