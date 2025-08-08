@@ -7,6 +7,16 @@ type vehicle struct {
 	lotId  uint
 }
 
+func (v *vehicle) Equals(vehicleTwo *vehicle) bool {
+	if vehicleTwo == nil {
+		return false
+	}
+	if v.number == vehicleTwo.number {
+		return true
+	}
+	return false
+}
+
 type Lot struct {
 	capacity                uint
 	vehicles                []*vehicle
