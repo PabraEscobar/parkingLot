@@ -16,3 +16,24 @@ func TestNewAttendantCannotExistWithNilLot(t *testing.T) {
 		t.Errorf("Attendant should not exist without the parking lot")
 	}
 }
+
+func TestAttendantParkVehicle(t *testing.T) {
+	//initalization
+	lot, _ := Newlot(2)
+	attendant, _ := NewAttendant(lot)
+	vehicleNumber := "KA03FG2345"
+	expectedVehicle := &vehicle{lotId: 1, number: vehicleNumber}
+	var actualVehicle *vehicle
+	var err error
+
+	//logic to test
+	actualVehicle, err = attendant.Park(vehicleNumber)
+
+	//assertions
+	if err != nil {
+		t.Errorf("attendent should park the vehicle")
+	}
+	if !expectedVehicle.Equals(actualVehicle) {
+		t.Errorf("vehicle number should be match with provided number")
+	}
+}
