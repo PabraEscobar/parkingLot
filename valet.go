@@ -6,6 +6,10 @@ type attendant struct {
 	lot ParkingLot
 }
 
+func (a *attendant) Unpark(vehicleNumber string) (*vehicle, error) {
+	return a.lot.Unpark(vehicleNumber)
+}
+
 func (a *attendant) Park(vehicleNumber string) (*vehicle, error) {
 	return a.lot.Park(vehicleNumber)
 }
