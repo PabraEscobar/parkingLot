@@ -1,6 +1,9 @@
 package parking
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestNewAttendant(t *testing.T) {
 	lot, _ := Newlot(2)
@@ -57,5 +60,25 @@ func TestAttendentUnparkVehicle(t *testing.T) {
 	}
 	if !expectedVehicle.Equals(actualVehicle) {
 		t.Errorf("vehicle number should be match with provided number")
+	}
+}
+
+func TestAttendantCannotParkWhenParkinFull(t *testing.T) {
+	//initalization
+	lot, _ := Newlot(1)
+	attendant, _ := NewAttendant(lot)
+	vehicleNumber := "KA03FG2345"
+	anotherVehicle := "KA03FG2344"
+
+	var actualErr error
+
+	//logic to test
+	attendant.Park(vehicleNumber)
+	_, actualErr = attendant.Park(anotherVehicle)
+	expectedErr := errors.New("parking is full")
+
+	//assertions
+	if actualErr.Error() != expectedErr.Error() {
+		t.Errorf("actual error should be parking is full")
 	}
 }

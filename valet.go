@@ -1,9 +1,17 @@
 package parking
 
-import "errors"
+import (
+	"errors"
+)
 
 type attendant struct {
-	lot ParkingLot
+	lot         *Lot
+	parkingFull bool
+}
+
+// ParkingFullReceive implements ParkingFullReceiver.
+func (a *attendant) ParkingFullReceive() {
+	a.parkingFull = true
 }
 
 func (a *attendant) Unpark(vehicleNumber string) (*vehicle, error) {
@@ -11,17 +19,17 @@ func (a *attendant) Unpark(vehicleNumber string) (*vehicle, error) {
 }
 
 func (a *attendant) Park(vehicleNumber string) (*vehicle, error) {
+	if a.parkingFull {
+		return nil, errors.New("parking is full")
+	}
 	return a.lot.Park(vehicleNumber)
 }
 
-type ParkingLot interface {
-	Park(vehicleNumber string) (*vehicle, error)
-	Unpark(vehicleNumber string) (*vehicle, error)
-}
-
-func NewAttendant(lot ParkingLot) (*attendant, error) {
+func NewAttendant(lot *Lot) (*attendant, error) {
 	if lot == nil {
 		return nil, errors.New("attendant does not exist without parking lot")
 	}
-	return &attendant{lot: lot}, nil
+	a := &attendant{lot: lot}
+	lot.SubscribeParkingFullStatus(a)
+	return a, nil
 }
