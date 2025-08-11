@@ -25,7 +25,7 @@ func TestAttendantParkVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
 	vehicleNumber := "KA03FG2345"
-	expectedVehicle := &vehicle{lotId: 1, number: vehicleNumber}
+	expectedVehicle := &vehicle{number: vehicleNumber}
 	var actualVehicle *vehicle
 	var err error
 
@@ -46,7 +46,7 @@ func TestAttendentUnparkVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
 	vehicleNumber := "KA03FG2345"
-	expectedVehicle := &vehicle{lotId: 1, number: vehicleNumber}
+	expectedVehicle := &vehicle{number: vehicleNumber}
 	var actualVehicle *vehicle
 	var err error
 
@@ -149,10 +149,10 @@ func TestAttendantParksInFirstAvailableSlot(t *testing.T) {
 
 	anotherVehicle := "KA03HJ6789"
 
-	v, _ := attendant.Park(anotherVehicle)
-
-	if v.lotId != 1 {
-		t.Errorf("vehicle should be parked in the first available slot, got slot %d", v.lotId)
+	expectedVehicle, _ := attendant.Park(anotherVehicle)
+	actualVehicle := lot.vehicles[0]
+	if !actualVehicle.Equals(expectedVehicle) {
+		t.Errorf("vehicle should be parked in the first available slot")
 	}
 }
 

@@ -20,12 +20,14 @@ func TestLotShouldNotCreatedWithCapacityZero(t *testing.T) {
 
 func TestCanMyCarBeParked(t *testing.T) {
 	parking, _ := Newlot(5)
-	vehicle, err := parking.Park("KA03T4567")
+	vehicleNumber := "KA03T4567"
+	actualVehicle, err := parking.Park(vehicleNumber)
 	if err != nil {
 		t.Errorf("Vehicle should be parked")
 	}
-	if (*vehicle).lotId == uint(0) {
-		t.Errorf("slot id cannot be zero")
+	expectedVehicle := vehicle{number: vehicleNumber}
+	if !actualVehicle.Equals(&expectedVehicle) {
+		t.Errorf("actual vehicle should be same as expected vehicle")
 	}
 }
 
@@ -176,8 +178,8 @@ func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatusEdgeC
 }
 
 func TestEqualityForVehicles(t *testing.T) {
-	vehicleOne := &vehicle{lotId: 1, number: "RJ19"}
-	vehicleTwo := &vehicle{lotId: 1, number: "RJ19"}
+	vehicleOne := &vehicle{number: "RJ19"}
+	vehicleTwo := &vehicle{number: "RJ19"}
 	flag := vehicleOne.Equals(vehicleTwo)
 	if flag == false {
 		t.Errorf("vehicleOne and vehicleTwo should be equal")
@@ -185,8 +187,8 @@ func TestEqualityForVehicles(t *testing.T) {
 }
 
 func TestEqualityForVehiclesWithDifferentLotID(t *testing.T) {
-	vehicleOne := &vehicle{lotId: 1, number: "RJ19"}
-	vehicleTwo := &vehicle{lotId: 2, number: "RJ19"}
+	vehicleOne := &vehicle{number: "RJ19"}
+	vehicleTwo := &vehicle{number: "RJ19"}
 	flag := vehicleOne.Equals(vehicleTwo)
 	if flag == false {
 		t.Errorf("vehicleOne and vehicleTwo should be equal")
@@ -194,7 +196,7 @@ func TestEqualityForVehiclesWithDifferentLotID(t *testing.T) {
 }
 
 func TestVehicleNotEqualToNil(t *testing.T) {
-	vehicleOne := &vehicle{lotId: 1, number: "RJ19"}
+	vehicleOne := &vehicle{number: "RJ19"}
 	flag := vehicleOne.Equals(nil)
 	if flag == true {
 		t.Errorf("vehicleOne should not be equal to nil")
