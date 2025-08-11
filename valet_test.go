@@ -82,3 +82,75 @@ func TestAttendantCannotParkWhenParkinFull(t *testing.T) {
 		t.Errorf("actual error should be parking is full")
 	}
 }
+
+
+func TestAttendantCannotParkSameVehicleTwice(t *testing.T) {
+    lot, _ := Newlot(2)
+    attendant, _ := NewAttendant(lot)
+    vehicleNumber := "KA03FG2345"
+
+    attendant.Park(vehicleNumber)
+    _, err2 := attendant.Park(vehicleNumber)
+
+    if err2 == nil {
+        t.Errorf("attendant should not be able to park the same vehicle twice")
+    }
+}
+
+
+func TestAttendantCannotParkWithEmptyVehicleNumber(t *testing.T) {
+    lot, _ := Newlot(2)
+    attendant, _ := NewAttendant(lot)
+
+    _, err := attendant.Park("")
+	
+    if err == nil {
+        t.Errorf("attendant should not be able to park vehicle with empty number")
+    }
+}
+
+
+func TestAttendantCannotUnparkNonexistentVehicle(t *testing.T) {
+    lot, _ := Newlot(2)
+    attendant, _ := NewAttendant(lot)
+    vehicleNumber := "KA03FG2345"
+	unparkVehicle := "KA04DF6789"
+
+	attendant.Park(vehicleNumber)
+    _, err := attendant.Unpark(unparkVehicle)
+
+    if err == nil {
+        t.Errorf("attendance cannot unpark the nonexistent vehicle")
+    }
+}
+
+func TestAttendantCannotUnparkWithEmptyVehicleNumber(t *testing.T) {
+    lot, _ := Newlot(2)
+    attendant, _ := NewAttendant(lot)
+
+    _, err := attendant.Unpark("")
+
+    if err == nil {
+        t.Errorf("attendant should not be able to unpark with empty vehicle number")
+    }
+}
+
+func TestAttendantParksInFirstAvailableSlot(t *testing.T) {
+    lot, _ := Newlot(3)
+    attendant, _ := NewAttendant(lot)
+	firstVehicle := "KA03FG2345"
+	secondVehicle := "KA04DF6789"
+
+    attendant.Park(firstVehicle)
+    attendant.Park(secondVehicle)
+
+    attendant.Unpark(firstVehicle)
+
+	anotherVehicle := "KA03HJ6789"
+
+    v, _ := attendant.Park(anotherVehicle)
+
+    if v.lotId != 1 {
+        t.Errorf("vehicle should be parked in the first available slot, got slot %d", v.lotId)
+    }
+}
