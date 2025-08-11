@@ -56,7 +56,7 @@ func TestAttendentUnparkVehicle(t *testing.T) {
 
 	//assertions
 	if err != nil {
-		t.Errorf("attendent should park the vehicle")
+		t.Errorf("attendent should unpark the vehicle")
 	}
 	if !expectedVehicle.Equals(actualVehicle) {
 		t.Errorf("vehicle number should be match with provided number")

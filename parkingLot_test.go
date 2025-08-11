@@ -178,25 +178,24 @@ func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatusEdgeC
 func TestEqualityForVehicles(t *testing.T) {
 	vehicleOne := &vehicle{lotId: 1, number: "RJ19"}
 	vehicleTwo := &vehicle{lotId: 1, number: "RJ19"}
-	var flag bool
-	flag = vehicleOne.Equals(vehicleTwo)
+	flag := vehicleOne.Equals(vehicleTwo)
 	if flag == false {
 		t.Errorf("vehicleOne and vehicleTwo should be equal")
 	}
 }
+
 func TestEqualityForVehiclesWithDifferentLotID(t *testing.T) {
 	vehicleOne := &vehicle{lotId: 1, number: "RJ19"}
 	vehicleTwo := &vehicle{lotId: 2, number: "RJ19"}
-	var flag bool
-	flag = vehicleOne.Equals(vehicleTwo)
+	flag := vehicleOne.Equals(vehicleTwo)
 	if flag == false {
 		t.Errorf("vehicleOne and vehicleTwo should be equal")
 	}
 }
+
 func TestVehicleNotEqualToNil(t *testing.T) {
 	vehicleOne := &vehicle{lotId: 1, number: "RJ19"}
-	var flag bool
-	flag = vehicleOne.Equals(nil)
+	flag := vehicleOne.Equals(nil)
 	if flag == true {
 		t.Errorf("vehicleOne should not be equal to nil")
 	}

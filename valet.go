@@ -9,7 +9,7 @@ type attendant struct {
 	parkingFull bool
 }
 
-// ParkingFullReceive implements ParkingFullReceiver.
+// attendant implements ParkingFullReceiver
 func (a *attendant) ParkingFullReceive() {
 	a.parkingFull = true
 }
