@@ -202,3 +202,14 @@ func TestVehicleNotEqualToNil(t *testing.T) {
 		t.Errorf("vehicleOne should not be equal to nil")
 	}
 }
+
+func TestParkAfterParkingAvailable(t *testing.T) {
+	lot,_:=Newlot(1)
+	vehicle:="RJ19"
+	lot.Park(vehicle)
+	lot.Unpark(vehicle)
+	_,err:=lot.Park(vehicle)
+	if err != nil {
+		t.Errorf("parking should take place after parking available")
+	}
+}

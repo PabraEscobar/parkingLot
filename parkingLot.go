@@ -56,7 +56,7 @@ func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
 		if l.vehicles[i] != nil && l.vehicles[i].number == vehicleNumber {
 			l.vehicles[i].number = ""
 			l.vehicles[i] = nil
-			if counter == int(l.capacity) {
+			if counter == int(l.capacity) && l.subscriberParkingStatus != nil {
 				l.subscriberParkingStatus.ParkingStatusReceive(ParkingAvailable)
 			}
 			return &vehicle{number: vehicleNumber}, nil
