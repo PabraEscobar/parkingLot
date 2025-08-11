@@ -155,3 +155,19 @@ func TestAttendantParksInFirstAvailableSlot(t *testing.T) {
 		t.Errorf("vehicle should be parked in the first available slot, got slot %d", v.lotId)
 	}
 }
+
+func TestParkingVehicleAfterUnparkWhenParkingFull(t *testing.T) {
+	lot, _ := Newlot(2)
+	attendant, _ := NewAttendant(lot)
+	firstVehicle := "KA03FG2345"
+	secondVehicle := "KA04DF6789"
+
+	attendant.Park(firstVehicle)
+	attendant.Park(secondVehicle)
+
+	attendant.Unpark(firstVehicle)
+	_, err := attendant.Park(firstVehicle)
+	if err != nil {
+		t.Errorf("attendent should able to park the vehicle")
+	}
+}

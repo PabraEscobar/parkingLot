@@ -14,6 +14,13 @@ func (a *attendant) ParkingFullReceive() {
 	a.parkingFull = true
 }
 
+// attendant implements ParkingStatusReceiver
+func (a *attendant) ParkingStatusReceive(status ParkingStatus) {
+	if status == ParkingAvailable {
+		a.parkingFull = false
+	}
+}
+
 func (a *attendant) Unpark(vehicleNumber string) (*vehicle, error) {
 	return a.lot.Unpark(vehicleNumber)
 }
@@ -31,5 +38,6 @@ func NewAttendant(lot *Lot) (*attendant, error) {
 	}
 	a := &attendant{lot: lot}
 	lot.SubscribeParkingFullStatus(a)
+	lot.subscriberParkingStatus = a
 	return a, nil
 }
