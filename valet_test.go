@@ -168,6 +168,6 @@ func TestParkingVehicleAfterUnparkWhenParkingFull(t *testing.T) {
 	attendant.Unpark(firstVehicle)
 	_, err := attendant.Park(firstVehicle)
 	if err != nil {
-		t.Errorf("attendent should able to park the vehicle")
+		t.Errorf("attendent should able to park the vehicle : %v",err)
 	}
 }
