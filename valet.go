@@ -5,7 +5,7 @@ import (
 )
 
 type attendant struct {
-	lot         *Lot
+	lot         *lot
 	parkingFull bool
 }
 
@@ -28,7 +28,7 @@ func (a *attendant) Park(vehicleNumber string) (*vehicle, error) {
 	return a.lot.Park(vehicleNumber)
 }
 
-func NewAttendant(lot *Lot) (*attendant, error) {
+func NewAttendant(lot *lot) (*attendant, error) {
 	if lot == nil {
 		return nil, errors.New("attendant does not exist without parking lot")
 	}
