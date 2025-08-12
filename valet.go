@@ -21,11 +21,11 @@ func (a *attendant) Unpark(vehicleNumber string) (*vehicle, error) {
 	return a.lot.Unpark(vehicleNumber)
 }
 
-func (a *attendant) Park(vehicleNumber string) (*vehicle, error) {
+func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 	if a.parkingFull {
 		return nil, errors.New("parking is full")
 	}
-	return a.lot.Park(vehicleNumber)
+	return a.lot.Park(vehicle)
 }
 
 func NewAttendant(lot *lot) (*attendant, error) {

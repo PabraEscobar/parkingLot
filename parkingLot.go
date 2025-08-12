@@ -73,15 +73,15 @@ func Newlot(capacity uint) (*lot, error) {
 	return &lot{capacity: capacity, vehicles: l}, nil
 }
 
-func (l *lot) Park(vehicleNumber string) (*vehicle, error) {
-	if vehicleNumber == "" {
+func (l *lot) Park(vehicle *vehicle) (*vehicle, error) {
+	if vehicle == nil {
 		return nil, errors.New("vehicle number is mandatory to park")
 	}
 	var counter int
 	for i := 0; i < len((*l).vehicles); i++ {
 		if (*l).vehicles[i] == nil {
 			counter = i + 1
-			(*l).vehicles[i] = &vehicle{number: vehicleNumber}
+			(*l).vehicles[i] = vehicle
 			if int(counter) == len((*l).vehicles) {
 				for j := 0; j < len(l.subscribersParkingFull); j++ {
 					if l.subscribersParkingFull[j] != nil {
@@ -92,10 +92,12 @@ func (l *lot) Park(vehicleNumber string) (*vehicle, error) {
 					l.subscriberParkingStatus.ParkingStatusReceive(ParkingFull)
 				}
 			}
-			return &vehicle{number: vehicleNumber}, nil
+			return vehicle, nil
 		}
-		if (*l).vehicles[i].number == vehicleNumber {
-			return nil, errors.New("car already parked in parking lot")
+		if (*l).vehicles[i] != nil {
+			if (*l).vehicles[i].Equals(vehicle) {
+				return nil, errors.New("car already parked in parking lot")
+			}
 		}
 	}
 	return nil, errors.New("parking lot is full")
