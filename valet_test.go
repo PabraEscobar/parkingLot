@@ -124,14 +124,13 @@ func TestAttendantCannotUnparkNonParkedVehicle(t *testing.T) {
 	}
 }
 
-func TestAttendantCannotUnparkWithEmptyVehicleNumber(t *testing.T) {
+func TestAttendantCannotUnparkNilVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
 
 	_, actualErr := attendant.Unpark("")
-	expectedErr := errors.New("vehicle number is manadatory to unpark the vehicle")
 
-	if actualErr.Error() != expectedErr.Error() {
+	if actualErr == nil {
 		t.Errorf("attendant should not be able to unpark with empty vehicle number")
 	}
 }

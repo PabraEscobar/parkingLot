@@ -43,7 +43,7 @@ func (l *lot) SubscribeParkingFullStatus(subscriber ParkingFullReceiver) {
 }
 
 func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
-	if car.number == "" {
+	if car == nil {
 		return nil, errors.New("vehicle number is manadatory to unpark the vehicle")
 	}
 	counter := 0
