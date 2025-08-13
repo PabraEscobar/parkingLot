@@ -42,8 +42,8 @@ func (l *lot) SubscribeParkingFullStatus(subscriber ParkingFullReceiver) {
 	l.subscribersParkingFull = append(l.subscribersParkingFull, subscriber)
 }
 
-func (l *lot) Unpark(vehicleNumber string) (*vehicle, error) {
-	if vehicleNumber == "" {
+func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
+	if car.number == "" {
 		return nil, errors.New("vehicle number is manadatory to unpark the vehicle")
 	}
 	counter := 0
@@ -53,16 +53,22 @@ func (l *lot) Unpark(vehicleNumber string) (*vehicle, error) {
 		}
 	}
 	for i := 0; i < len(l.vehicles); i++ {
-		if l.vehicles[i] != nil && l.vehicles[i].number == vehicleNumber {
-			l.vehicles[i].number = ""
+		if l.isFreeSlot(i) {
+			continue
+		}
+		if l.vehicles[i].Equals(car) {
 			l.vehicles[i] = nil
 			if counter == int(l.capacity) && l.subscriberParkingStatus != nil {
 				l.subscriberParkingStatus.ParkingStatusReceive(ParkingAvailable)
 			}
-			return &vehicle{number: vehicleNumber}, nil
+			return &vehicle{number: car.number}, nil
 		}
 	}
 	return nil, errors.New("vehicle not parked in the parking lot with provided number")
+}
+
+func (l *lot) isFreeSlot(i int) bool {
+	return l.vehicles[i] == nil
 }
 
 func Newlot(capacity uint) (*lot, error) {

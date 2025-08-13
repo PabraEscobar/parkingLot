@@ -18,7 +18,9 @@ func (a *attendant) Unpark(vehicleNumber string) (*vehicle, error) {
 	if a.parkingFull {
 		a.parkingFull = false
 	}
-	return a.lot.Unpark(vehicleNumber)
+	return a.lot.Unpark(&vehicle{
+		number: vehicleNumber,
+	})
 }
 
 func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {

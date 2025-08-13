@@ -44,7 +44,7 @@ func TestUnparkVehicle(t *testing.T) {
 	parking, _ := Newlot(5)
 	car := &vehicle{number: vehicleNumber}
 	parking.Park(car)
-	vehicleUnparked, err := parking.Unpark(vehicleNumber)
+	vehicleUnparked, err := parking.Unpark(car)
 	if err != nil {
 		t.Errorf("vehicle should be unparked")
 	}
@@ -53,10 +53,13 @@ func TestUnparkVehicle(t *testing.T) {
 	}
 }
 
+var (
+	vehicle1 = vehicle{number: vehicleNumber}
+)
+
 func TestUnparkVehicleWhichIsNotParked(t *testing.T) {
 	parking, _ := Newlot(5)
-	vehicle := "KA03T4567"
-	_, err := parking.Unpark(vehicle)
+	_, err := parking.Unpark(&vehicle1)
 	if err == nil {
 		t.Errorf("vehichle is not parked with these number")
 	}
@@ -144,7 +147,7 @@ func TestOnlyNotifiedToOwnerThatParkingAvailableAndFull(t *testing.T) {
 	if owner.receivedStatus != ParkingFull {
 		t.Errorf("owner is not notified that parking is Full")
 	}
-	parking.Unpark(anotherVehicleNumber)
+	parking.Unpark(car2)
 	if owner.receivedStatus != ParkingAvailable {
 		t.Errorf("owner is not notified that parking is available")
 	}
@@ -156,7 +159,7 @@ func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatus(t *t
 	parking.subscriberParkingStatus = owner
 	parking.Park(&vehicle{number: vehicleNumber})
 	parking.Park(&vehicle{number: anotherVehicleNumber})
-	parking.Unpark(anotherVehicleNumber)
+	parking.Unpark(car2)
 	if owner.receivedStatus != ParkingAvailable {
 		t.Errorf("owner is not notified")
 	}
@@ -169,7 +172,7 @@ func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatusEdgeC
 
 	parking.Park(&vehicle{number: vehicleNumber})
 	parking.Park(&vehicle{number: anotherVehicleNumber})
-	parking.Unpark(vehicleNumber)
+	parking.Unpark(car2)
 
 	if owner.receivedStatus != ParkingAvailable {
 		t.Errorf("owner is not notified")
@@ -205,7 +208,7 @@ func TestVehicleNotEqualToNil(t *testing.T) {
 func TestParkAfterParkingAvailable(t *testing.T) {
 	lot, _ := Newlot(1)
 	lot.Park(car1)
-	lot.Unpark(vehicleNumber)
+	lot.Unpark(car1)
 	_, err := lot.Park(car1)
 	if err != nil {
 		t.Errorf("parking should take place after parking available")
