@@ -236,3 +236,17 @@ func TestNotifySubscriberWhenParkingAvailable(t *testing.T){
 		t.Errorf("owner is not notified")
 	}
 }
+
+func TestNewVehicle(t *testing.T) {
+	_, err := NewVehicle("23BH6543IS")
+	if err != nil {
+		t.Errorf("vehicle should be created with provided number")
+	}
+}
+
+func TestNewVehicleShouldNotCreatedWithEmptyNumber(t *testing.T) {
+	_, err := NewVehicle("")
+	if err == nil {
+		t.Errorf("vehicle should be created with provided number")
+	}
+}

@@ -6,6 +6,12 @@ type vehicle struct {
 	number string
 }
 
+func NewVehicle(number string) (*vehicle, error) {
+	if number==""{
+		return nil, errors.New("vehicle number is mandatory")
+	}
+	return &vehicle{number: number}, nil
+}
 func (v *vehicle) Equals(vehicleTwo *vehicle) bool {
 	if vehicleTwo == nil {
 		return false
