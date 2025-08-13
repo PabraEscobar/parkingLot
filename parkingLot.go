@@ -48,14 +48,10 @@ func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
 	}
 	counter := 0
 	for i := 0; i < len(l.vehicles); i++ {
-		if l.vehicles[i] != nil {
-			counter++
-		}
-	}
-	for i := 0; i < len(l.vehicles); i++ {
 		if l.isFreeSlot(i) {
 			continue
 		}
+		counter++
 		if l.vehicles[i].Equals(car) {
 			l.vehicles[i] = nil
 			if counter == int(l.capacity) && l.subscriberParkingStatus != nil {
@@ -85,10 +81,10 @@ func (l *lot) Park(vehicle *vehicle) (*vehicle, error) {
 	}
 	var counter int
 	for i := 0; i < len((*l).vehicles); i++ {
-		if (*l).vehicles[i] == nil {
+		if l.isFreeSlot(i) {
 			counter = i + 1
 			(*l).vehicles[i] = vehicle
-			if int(counter) == len((*l).vehicles) {
+			if counter == len((*l).vehicles) {
 				for j := 0; j < len(l.subscribersParkingFull); j++ {
 					if l.subscribersParkingFull[j] != nil {
 						l.subscribersParkingFull[j].ParkingFullReceive()
@@ -100,7 +96,7 @@ func (l *lot) Park(vehicle *vehicle) (*vehicle, error) {
 			}
 			return vehicle, nil
 		}
-		if (*l).vehicles[i] != nil {
+		if !l.isFreeSlot(i) {
 			if (*l).vehicles[i].Equals(vehicle) {
 				return nil, errors.New("car already parked in parking lot")
 			}
