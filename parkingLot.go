@@ -59,7 +59,7 @@ func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
 		if l.vehicles[i].Equals(car) {
 			l.vehicles[i] = nil
 			l.notifyParkingAvailable()
-			return &vehicle{number: car.number}, nil
+			return car, nil
 		}
 	}
 	return nil, errors.New("vehicle not parked in the parking lot with provided number")
