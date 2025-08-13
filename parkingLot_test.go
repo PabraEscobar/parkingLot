@@ -222,3 +222,17 @@ func TestUnparkNilVehicle(t *testing.T) {
 		t.Errorf("nil vehicle cannot be unparked")
 	}
 }
+
+func TestNotifySubscriberWhenParkingAvailable(t *testing.T){
+	parking, _ := Newlot(2)
+	owner := &mockOwner{}
+	parking.subscriberParkingStatus = owner
+
+	parking.Park(&vehicle{number: vehicleNumber})
+	parking.Park(&vehicle{number: anotherVehicleNumber})
+	parking.Unpark(car1)
+
+	if owner.receivedStatus != ParkingAvailable {
+		t.Errorf("owner is not notified")
+	}
+}

@@ -46,21 +46,32 @@ func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
 	if car == nil {
 		return nil, errors.New("vehicle number is manadatory to unpark the vehicle")
 	}
-	counter := 0
 	for i := 0; i < len(l.vehicles); i++ {
 		if l.isFreeSlot(i) {
 			continue
 		}
-		counter++
 		if l.vehicles[i].Equals(car) {
 			l.vehicles[i] = nil
-			if counter == int(l.capacity) && l.subscriberParkingStatus != nil {
-				l.subscriberParkingStatus.ParkingStatusReceive(ParkingAvailable)
-			}
+			l.notifyParkingAvailable()
 			return &vehicle{number: car.number}, nil
 		}
 	}
 	return nil, errors.New("vehicle not parked in the parking lot with provided number")
+}
+
+func (l *lot) notifyParkingAvailable() {
+	vehicleCount := 0
+	for i := 0; i < len(l.vehicles); i++ {
+		if l.vehicles[i] != nil {
+			vehicleCount++
+		}
+	}
+	if uint(vehicleCount+1) != l.capacity {
+		return
+	}
+	if l.subscriberParkingStatus != nil {
+		l.subscriberParkingStatus.ParkingStatusReceive(ParkingAvailable)
+	}
 }
 
 func (l *lot) isFreeSlot(i int) bool {
