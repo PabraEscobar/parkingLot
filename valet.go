@@ -14,13 +14,11 @@ func (a *attendant) ParkingFullReceive() {
 	a.parkingFull = true
 }
 
-func (a *attendant) Unpark(vehicleNumber string) (*vehicle, error) {
+func (a *attendant) Unpark(vehicle *vehicle) (*vehicle, error) {
 	if a.parkingFull {
 		a.parkingFull = false
 	}
-	return a.lot.Unpark(&vehicle{
-		number: vehicleNumber,
-	})
+	return a.lot.Unpark(vehicle)
 }
 
 func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {

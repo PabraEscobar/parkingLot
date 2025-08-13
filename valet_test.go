@@ -21,9 +21,6 @@ func TestNewAttendantCannotExistWithNilLot(t *testing.T) {
 	}
 }
 
-var(
-	vehNumber="TN39AD1232"
-)
 func TestAttendantParkVehicle(t *testing.T) {
 	//initalization
 	lot, _ := Newlot(2)
@@ -55,7 +52,7 @@ func TestAttendentUnparkVehicle(t *testing.T) {
 
 	//logic to test
 	_, _ = attendant.Park(car1)
-	actualVehicle, err = attendant.Unpark(vehNumber)
+	actualVehicle, err = attendant.Unpark(car1)
 
 	//assertions
 	if err != nil {
@@ -113,7 +110,7 @@ func TestAttendantCannotUnparkNonParkedVehicle(t *testing.T) {
 	// unparkVehicle := carOne
 
 	attendant.Park(car2)
-	_, actualErr := attendant.Unpark(vehNumber)
+	_, actualErr := attendant.Unpark(car1)
 	expectedErr := errors.New("vehicle not parked in the parking lot with provided number")
 	if actualErr.Error() != expectedErr.Error() {
 		t.Errorf("attendance cannot unpark the nonexistent vehicle")
@@ -124,7 +121,7 @@ func TestAttendantCannotUnparkNilVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
 
-	_, actualErr := attendant.Unpark("")
+	_, actualErr := attendant.Unpark(nil)
 
 	if actualErr == nil {
 		t.Errorf("attendant should not be able to unpark with empty vehicle number")
@@ -137,7 +134,7 @@ func TestAttendantParksInFirstAvailableSlot(t *testing.T) {
 	attendant.Park(car1)
 	attendant.Park(car2)
 
-	_, err2 := attendant.Unpark(vehNumber)
+	_, err2 := attendant.Unpark(car1)
 	if err2 != nil {
 		t.Error(err2)
 	}
@@ -155,7 +152,7 @@ func TestParkingVehicleAfterUnparkWhenParkingFull(t *testing.T) {
 	attendant.Park(car1)
 	attendant.Park(car2)
 
-	attendant.Unpark(vehNumber)
+	attendant.Unpark(car1)
 	_, err := attendant.Park(car1)
 	if err != nil {
 		t.Errorf("attendent should able to park the vehicle : %v", err)
