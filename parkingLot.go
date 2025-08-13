@@ -86,25 +86,34 @@ func Newlot(capacity uint) (*lot, error) {
 	return &lot{capacity: capacity, vehicles: l}, nil
 }
 
+func (l *lot) notifyParkingFull() {
+	vehicleCount := 0
+	for i := 0; i < len(l.vehicles); i++ {
+		if l.vehicles[i] != nil {
+			vehicleCount++
+		}
+	}
+	if uint(vehicleCount) != l.capacity {
+		return
+	}
+	if l.subscriberParkingStatus != nil {
+		l.subscriberParkingStatus.ParkingStatusReceive(ParkingFull)
+	}
+	if len(l.subscribersParkingFull) > 0 {
+		for j := 0; j < len(l.subscribersParkingFull); j++ {
+			l.subscribersParkingFull[j].ParkingFullReceive()
+		}
+	}
+}
+
 func (l *lot) Park(vehicle *vehicle) (*vehicle, error) {
 	if vehicle == nil {
 		return nil, errors.New("vehicle number is mandatory to park")
 	}
-	var counter int
 	for i := 0; i < len((*l).vehicles); i++ {
 		if l.isFreeSlot(i) {
-			counter = i + 1
 			(*l).vehicles[i] = vehicle
-			if counter == len((*l).vehicles) {
-				for j := 0; j < len(l.subscribersParkingFull); j++ {
-					if l.subscribersParkingFull[j] != nil {
-						l.subscribersParkingFull[j].ParkingFullReceive()
-					}
-				}
-				if l.subscriberParkingStatus != nil {
-					l.subscriberParkingStatus.ParkingStatusReceive(ParkingFull)
-				}
-			}
+			l.notifyParkingFull()
 			return vehicle, nil
 		}
 		if !l.isFreeSlot(i) {
