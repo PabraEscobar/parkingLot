@@ -44,6 +44,19 @@ func TestNilVehicleShouldNotBeParked(t *testing.T) {
 	}
 }
 
+func TestVehicleSholdNotBeParkedWhenParkingLotFull(t *testing.T) {
+	parking, _ := Newlot(1)
+	_, err := parking.Park(car1)
+	if err != nil {
+		t.Fatalf("test setup failed %v", err)
+	}
+	_, actualErr := parking.Park(car2)
+	expectedErr := errors.New("parking lot is full")
+	if actualErr.Error() != expectedErr.Error() {
+		t.Fatalf("actualErr should be equal to expectedErr")
+	}
+}
+
 func TestUnparkVehicle(t *testing.T) {
 	parking, _ := Newlot(5)
 	parking.Park(car1)
@@ -91,7 +104,7 @@ func TestCarParkingTimePass(t *testing.T) {
 		t.Fatalf("should be able to unpark car1 %v", err)
 	}
 
-    _  , err = l.Park(car2)
+	_, err = l.Park(car2)
 	if err == nil {
 		t.Fatalf("should give error car already parked")
 	}

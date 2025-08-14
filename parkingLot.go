@@ -7,7 +7,7 @@ type vehicle struct {
 }
 
 func NewVehicle(number string) (*vehicle, error) {
-	if number==""{
+	if number == "" {
 		return nil, errors.New("vehicle number is mandatory")
 	}
 	return &vehicle{number: number}, nil
