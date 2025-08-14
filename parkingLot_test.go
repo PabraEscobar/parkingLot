@@ -87,7 +87,7 @@ func TestCarAlreadyParked(t *testing.T) {
 		t.Errorf("Car already parked can't be parked again")
 	}
 }
-func TestCarParkingTimePass(t *testing.T) {
+func TestCarParkingAlreadyParkedInAnySlot(t *testing.T) {
 	l, _ := Newlot(5)
 
 	_, err := l.Park(car1)
@@ -245,8 +245,9 @@ func TestParkAfterParkingAvailable(t *testing.T) {
 
 func TestUnparkNilVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
-	_, err := lot.Unpark(nil)
-	if err == nil {
+	_, actualErr := lot.Unpark(nil)
+	expectedErr := errors.New("nil vehicle cannot be unparked")
+	if actualErr.Error() != expectedErr.Error() {
 		t.Errorf("nil vehicle cannot be unparked")
 	}
 }
@@ -276,5 +277,16 @@ func TestNewVehicleShouldNotCreatedWithEmptyNumber(t *testing.T) {
 	_, err := NewVehicle("")
 	if err == nil {
 		t.Errorf("vehicle should be created with provided number")
+	}
+}
+
+func TestUnparkCannotDoneForNonExistentVehicle(t *testing.T) {
+	lot, _ := Newlot(2)
+
+	lot.Park(car2)
+	_, actualErr := lot.Unpark(car1)
+	expectedErr := errors.New("vehicle not parked in the parking lot")
+	if actualErr.Error() != expectedErr.Error() {
+		t.Errorf("attendance cannot unpark the nonexistent vehicle")
 	}
 }

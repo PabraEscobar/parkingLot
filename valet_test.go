@@ -107,11 +107,10 @@ func TestAttendantCannotParkNilVehicle(t *testing.T) {
 func TestAttendantCannotUnparkNonParkedVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
-	// unparkVehicle := carOne
 
 	attendant.Park(car2)
 	_, actualErr := attendant.Unpark(car1)
-	expectedErr := errors.New("vehicle not parked in the parking lot with provided number")
+	expectedErr := errors.New("vehicle not parked in the parking lot")
 	if actualErr.Error() != expectedErr.Error() {
 		t.Errorf("attendance cannot unpark the nonexistent vehicle")
 	}

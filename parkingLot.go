@@ -50,7 +50,7 @@ func (l *lot) SubscribeParkingFullStatus(subscriber ParkingFullReceiver) {
 
 func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
 	if car == nil {
-		return nil, errors.New("vehicle number is manadatory to unpark the vehicle")
+		return nil, errors.New("nil vehicle cannot be unparked")
 	}
 	for i := 0; i < len(l.slots); i++ {
 		if l.isFreeSlot(i) {
@@ -62,7 +62,7 @@ func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
 			return car, nil
 		}
 	}
-	return nil, errors.New("vehicle not parked in the parking lot with provided number")
+	return nil, errors.New("vehicle not parked in the parking lot")
 }
 
 func (l *lot) notifyParkingAvailable() {
