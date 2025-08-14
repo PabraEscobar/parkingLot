@@ -74,6 +74,29 @@ func TestCarAlreadyParked(t *testing.T) {
 		t.Errorf("Car already parked can't be parked again")
 	}
 }
+func TestCarParkingTimePass(t *testing.T) {
+	l, _ := Newlot(5)
+
+	_, err := l.Park(car1)
+	if err != nil {
+		t.Fatalf("should be able to park car1 %v", err)
+	}
+	_, err = l.Park(car2)
+	if err != nil {
+		t.Fatalf("should be able to park car2 %v", err)
+	}
+
+	_, err = l.Unpark(car1)
+	if err != nil {
+		t.Fatalf("should be able to unpark car1 %v", err)
+	}
+
+    _  , err = l.Park(car2)
+	if err == nil {
+		t.Fatalf("should give error car already parked")
+	}
+
+}
 
 type mockParkingFull struct {
 	receivedStatus ParkingStatus

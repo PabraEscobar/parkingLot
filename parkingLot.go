@@ -116,17 +116,26 @@ func (l *lot) Park(vehicle *vehicle) (*vehicle, error) {
 	if vehicle == nil {
 		return nil, errors.New("vehicle number is mandatory to park")
 	}
-	for i := 0; i < len((*l).vehicles); i++ {
+	if l.Isparked(vehicle) {
+		return nil, errors.New("car already parked in parking lot")
+	}
+
+	//find available slot
+	for i := 0; i < len(l.vehicles); i++ {
 		if l.isFreeSlot(i) {
-			(*l).vehicles[i] = vehicle
+			l.vehicles[i] = vehicle
 			l.notifyParkingFull()
 			return vehicle, nil
 		}
-		if !l.isFreeSlot(i) {
-			if (*l).vehicles[i].Equals(vehicle) {
-				return nil, errors.New("car already parked in parking lot")
-			}
-		}
 	}
 	return nil, errors.New("parking lot is full")
+}
+
+func (l *lot) Isparked(vehicle *vehicle) bool {
+	for i := 0; i < len(l.vehicles); i++ {
+		if vehicle.Equals(l.vehicles[i]) {
+			return true
+		}
+	}
+	return false
 }
