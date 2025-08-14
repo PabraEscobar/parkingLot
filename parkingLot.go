@@ -24,10 +24,12 @@ func (v *vehicle) Equals(vehicleTwo *vehicle) bool {
 
 type lot struct {
 	capacity                uint
+	//TODO reveal intention
 	slots                   []*vehicle
 	subscribersParkingFull  []ParkingFullReceiver
 	subscriberParkingStatus ParkingStatusReceiver
 }
+
 type ParkingStatus uint
 
 const (
@@ -37,13 +39,15 @@ const (
 )
 
 type ParkingStatusReceiver interface {
+	//todo reveal intention
 	ParkingStatusReceive(status ParkingStatus)
 }
 
 type ParkingFullReceiver interface {
+	//TODO reveal intention
 	ParkingFullReceive()
 }
-
+//TODO reveal intention
 func (l *lot) SubscribeParkingFullStatus(subscriber ParkingFullReceiver) {
 	l.subscribersParkingFull = append(l.subscribersParkingFull, subscriber)
 }
@@ -56,6 +60,7 @@ func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
 		if l.isFreeSlot(i) {
 			continue
 		}
+		//TODO indentation
 		if l.slots[i].Equals(car) {
 			l.slots[i] = nil
 			l.notifyParkingAvailable()
@@ -105,6 +110,7 @@ func (l *lot) notifyParkingFull() {
 	if l.subscriberParkingStatus != nil {
 		l.subscriberParkingStatus.ParkingStatusReceive(ParkingFull)
 	}
+	//TODO fewest elements
 	if len(l.subscribersParkingFull) > 0 {
 		for j := 0; j < len(l.subscribersParkingFull); j++ {
 			l.subscribersParkingFull[j].ParkingFullReceive()
@@ -116,6 +122,7 @@ func (l *lot) Park(vehicle *vehicle) (*vehicle, error) {
 	if vehicle == nil {
 		return nil, errors.New("vehicle number is mandatory to park")
 	}
+	//TODO why function is exported?
 	if l.Isparked(vehicle) {
 		return nil, errors.New("car already parked in parking lot")
 	}
