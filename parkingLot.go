@@ -24,7 +24,7 @@ func (v *vehicle) Equals(vehicleTwo *vehicle) bool {
 
 type lot struct {
 	capacity                uint
-	vehicles                []*vehicle
+	slots                   []*vehicle
 	subscribersParkingFull  []ParkingFullReceiver
 	subscriberParkingStatus ParkingStatusReceiver
 }
@@ -52,12 +52,12 @@ func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
 	if car == nil {
 		return nil, errors.New("vehicle number is manadatory to unpark the vehicle")
 	}
-	for i := 0; i < len(l.vehicles); i++ {
+	for i := 0; i < len(l.slots); i++ {
 		if l.isFreeSlot(i) {
 			continue
 		}
-		if l.vehicles[i].Equals(car) {
-			l.vehicles[i] = nil
+		if l.slots[i].Equals(car) {
+			l.slots[i] = nil
 			l.notifyParkingAvailable()
 			return car, nil
 		}
@@ -67,8 +67,8 @@ func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
 
 func (l *lot) notifyParkingAvailable() {
 	vehicleCount := 0
-	for i := 0; i < len(l.vehicles); i++ {
-		if l.vehicles[i] != nil {
+	for i := 0; i < len(l.slots); i++ {
+		if l.slots[i] != nil {
 			vehicleCount++
 		}
 	}
@@ -81,7 +81,7 @@ func (l *lot) notifyParkingAvailable() {
 }
 
 func (l *lot) isFreeSlot(i int) bool {
-	return l.vehicles[i] == nil
+	return l.slots[i] == nil
 }
 
 func Newlot(capacity uint) (*lot, error) {
@@ -89,13 +89,13 @@ func Newlot(capacity uint) (*lot, error) {
 		return nil, errors.New("capacity can't be zero")
 	}
 	l := make([]*vehicle, capacity)
-	return &lot{capacity: capacity, vehicles: l}, nil
+	return &lot{capacity: capacity, slots: l}, nil
 }
 
 func (l *lot) notifyParkingFull() {
 	vehicleCount := 0
-	for i := 0; i < len(l.vehicles); i++ {
-		if l.vehicles[i] != nil {
+	for i := 0; i < len(l.slots); i++ {
+		if l.slots[i] != nil {
 			vehicleCount++
 		}
 	}
@@ -121,9 +121,9 @@ func (l *lot) Park(vehicle *vehicle) (*vehicle, error) {
 	}
 
 	//find available slot
-	for i := 0; i < len(l.vehicles); i++ {
+	for i := 0; i < len(l.slots); i++ {
 		if l.isFreeSlot(i) {
-			l.vehicles[i] = vehicle
+			l.slots[i] = vehicle
 			l.notifyParkingFull()
 			return vehicle, nil
 		}
@@ -132,8 +132,8 @@ func (l *lot) Park(vehicle *vehicle) (*vehicle, error) {
 }
 
 func (l *lot) Isparked(vehicle *vehicle) bool {
-	for i := 0; i < len(l.vehicles); i++ {
-		if vehicle.Equals(l.vehicles[i]) {
+	for i := 0; i < len(l.slots); i++ {
+		if vehicle.Equals(l.slots[i]) {
 			return true
 		}
 	}
