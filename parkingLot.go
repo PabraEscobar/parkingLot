@@ -23,11 +23,12 @@ func (v *vehicle) Equals(vehicleTwo *vehicle) bool {
 }
 
 type lot struct {
-	capacity                uint
+	capacity uint
 	//TODO reveal intention
 	slots                   []*vehicle
 	subscribersParkingFull  []ParkingFullReceiver
 	subscriberParkingStatus ParkingStatusReceiver
+	id                      uint
 }
 
 type ParkingStatus uint
@@ -95,6 +96,15 @@ func Newlot(capacity uint) (*lot, error) {
 	}
 	l := make([]*vehicle, capacity)
 	return &lot{capacity: capacity, slots: l}, nil
+}
+
+func NewlotV2(id, capacity uint) (*lot, error) {
+	l, err := Newlot(capacity)
+	if err != nil {
+		return nil, err
+	}
+	l.id = id
+	return l, nil
 }
 
 func (l *lot) notifyParkingFull() {

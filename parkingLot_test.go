@@ -290,3 +290,23 @@ func TestUnparkCannotDoneForNonExistentVehicle(t *testing.T) {
 		t.Errorf("attendance cannot unpark the nonexistent vehicle")
 	}
 }
+
+func TestNewParkingLotWithId(t *testing.T) {
+	lot, err := NewlotV2(1, 2)
+	if err != nil {
+		t.Fatal("new lot is not created with id 1")
+	}
+	if lot.id != 1 {
+		t.Fatal("id of the lot should be equal to 1")
+	}
+}
+
+func TestNewlotv2ShouldNotCreateLotWithZeroCapacity(t *testing.T) {
+	lot, err := NewlotV2(1, 0)
+	if err == nil {
+		t.Fatal("lot should not be created with zero capacity")
+	}
+	if lot != nil {
+		t.Fatal("lot should be nil")
+	}
+}
