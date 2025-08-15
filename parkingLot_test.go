@@ -112,11 +112,13 @@ func TestCarParkingAlreadyParkedInAnySlot(t *testing.T) {
 }
 
 type mockParkingFull struct {
+	id             uint
 	receivedStatus ParkingStatus
 }
 
-func (m *mockParkingFull) ParkingFullReceive() {
+func (m *mockParkingFull) ParkingFullReceive(i uint) {
 	m.receivedStatus = ParkingFull
+	m.id = i
 }
 
 func TestNotifiedSubscriberThatParkingFullOfCapacityOne(t *testing.T) {
@@ -309,4 +311,19 @@ func TestNewlotv2ShouldNotCreateLotWithZeroCapacity(t *testing.T) {
 	if lot != nil {
 		t.Fatal("lot should be nil")
 	}
+}
+
+func TestNotifiedParkingFullWithLotId(t *testing.T) {
+	l, _ := NewlotV2(1, 1)
+	mockSubscriber := &mockParkingFull{}
+	l.SubscribeParkingFullStatus(mockSubscriber)
+	_, err := l.Park(car1)
+	if err != nil {
+		t.Fatalf("park setup failed %v", err)
+	}
+
+	if mockSubscriber.id != 1 {
+		t.Fatal("received id of the lot should be 1")
+	}
+
 }

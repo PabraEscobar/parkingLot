@@ -46,9 +46,10 @@ type ParkingStatusReceiver interface {
 
 type ParkingFullReceiver interface {
 	//TODO reveal intention
-	ParkingFullReceive()
+	ParkingFullReceive(i uint)
 }
-//TODO reveal intention
+
+// TODO reveal intention
 func (l *lot) SubscribeParkingFullStatus(subscriber ParkingFullReceiver) {
 	l.subscribersParkingFull = append(l.subscribersParkingFull, subscriber)
 }
@@ -123,7 +124,7 @@ func (l *lot) notifyParkingFull() {
 	//TODO fewest elements
 	if len(l.subscribersParkingFull) > 0 {
 		for j := 0; j < len(l.subscribersParkingFull); j++ {
-			l.subscribersParkingFull[j].ParkingFullReceive()
+			l.subscribersParkingFull[j].ParkingFullReceive(l.id)
 		}
 	}
 }

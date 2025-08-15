@@ -10,7 +10,7 @@ type attendant struct {
 }
 
 // attendant implements ParkingFullReceiver
-func (a *attendant) ParkingFullReceive() {
+func (a *attendant) ParkingFullReceive(i uint) {
 	a.parkingFull = true
 }
 
