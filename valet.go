@@ -15,10 +15,21 @@ func (a *attendant) ParkingFullReceive(i uint) {
 }
 
 func (a *attendant) Unpark(vehicle *vehicle) (*vehicle, error) {
-	if a.parkingFull[0] {
-		a.parkingFull[0] = false
+	if !a.isParked(vehicle) {
+		return nil, errors.New("vehicle not parked in the parking lot")
 	}
-	return a.lots[0].Unpark(vehicle)
+
+	for _, lot := range a.lots {
+		if !lot.Isparked(vehicle) {
+			continue
+		}
+		_, err := lot.Unpark(vehicle)
+		if err != nil {
+			return nil, err
+		}
+		a.parkingFull[lot.id] = false
+	}
+	return vehicle, nil
 }
 
 func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {

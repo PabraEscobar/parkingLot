@@ -190,3 +190,51 @@ func TestAttendantCanParkCarInNextLot(t *testing.T) {
 		t.Fatalf("park setup failed for car2 %v", err)
 	}
 }
+
+func TestAttendantUnparkVehicleParkedInAnyLot(t *testing.T) {
+	lot, _ := NewlotV2(0, 1)
+	anotherLot, _ := NewlotV2(1, 1)
+	attendant, _ := NewAttendant(lot, anotherLot)
+
+	_, err := attendant.Park(car1)
+	if err != nil {
+		t.Fatalf("park setup failed for car1 %v", err)
+	}
+
+	_, err = attendant.Park(car2)
+	if err != nil {
+		t.Fatalf("park setup failed for car2 %v", err)
+	}
+
+	_, err = attendant.Unpark(car2)
+	if err != nil {
+		t.Fatalf("unpark setup failed for car2 %v", err)
+	}
+
+}
+
+func TestAttendantCanParkSameVehicleAfterUnPark(t *testing.T) {
+	lot, _ := NewlotV2(0, 1)
+	anotherLot, _ := NewlotV2(1, 1)
+	attendant, _ := NewAttendant(lot, anotherLot)
+
+	_, err := attendant.Park(car1)
+	if err != nil {
+		t.Fatalf("park setup failed for car1 %v", err)
+	}
+
+	_, err = attendant.Park(car2)
+	if err != nil {
+		t.Fatalf("park setup failed for car2 %v", err)
+	}
+
+	_, err = attendant.Unpark(car1)
+	if err != nil {
+		t.Fatalf("unpark setup failed for car1 %v", err)
+	}
+
+	_, err = attendant.Park(car1)
+	if err != nil {
+		t.Fatalf("park setup failed for car1 after unpark %v", err)
+	}
+}
