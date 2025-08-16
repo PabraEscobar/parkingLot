@@ -157,3 +157,20 @@ func TestParkingVehicleAfterUnparkWhenParkingFull(t *testing.T) {
 		t.Errorf("attendent should able to park the vehicle : %v", err)
 	}
 }
+
+func TestAttendantManageMultipleLot(t *testing.T) {
+	//intialization
+	lot, _ := NewlotV2(1, 1)
+	anotherLot, _ := NewlotV2(2, 1)
+
+	//business logic
+	attendant, err := NewAttendant(lot, anotherLot)
+
+	//assertions
+	if err != nil {
+		t.Fatal("attendant should be created with multiple lots")
+	}
+	if len(attendant.lots) != 2 {
+		t.Fatal("attendant should have 2 lots")
+	}
+}

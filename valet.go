@@ -5,7 +5,7 @@ import (
 )
 
 type attendant struct {
-	lot         *lot
+	lots        []*lot
 	parkingFull bool
 }
 
@@ -18,21 +18,27 @@ func (a *attendant) Unpark(vehicle *vehicle) (*vehicle, error) {
 	if a.parkingFull {
 		a.parkingFull = false
 	}
-	return a.lot.Unpark(vehicle)
+	return a.lots[0].Unpark(vehicle)
 }
 
 func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 	if a.parkingFull {
 		return nil, errors.New("parking is full")
 	}
-	return a.lot.Park(vehicle)
+	return a.lots[0].Park(vehicle)
 }
 
-func NewAttendant(lot *lot) (*attendant, error) {
-	if lot == nil {
-		return nil, errors.New("attendant does not exist without parking lot")
+func NewAttendant(lots ...*lot) (*attendant, error) {
+	for _, lot := range lots {
+		if lot == nil {
+			return nil, errors.New("attendant does not exist without parking lot")
+		}
 	}
-	a := &attendant{lot: lot}
-	lot.SubscribeParkingFullStatus(a)
+	l := make([]*lot, 0, len(lots))
+	l = append(l, lots...)
+	a := &attendant{lots: l}
+	for _, lot := range lots {
+		lot.SubscribeParkingFullStatus(a)
+	}
 	return a, nil
 }
