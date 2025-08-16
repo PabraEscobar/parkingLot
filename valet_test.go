@@ -174,3 +174,19 @@ func TestAttendantManageMultipleLot(t *testing.T) {
 		t.Fatal("attendant should have 2 lots")
 	}
 }
+
+func TestAttendantCanParkCarInNextLot(t *testing.T) {
+	lot, _ := NewlotV2(0, 1)
+	anotherLot, _ := NewlotV2(1, 1)
+	attendant, _ := NewAttendant(lot, anotherLot)
+
+	_, err := attendant.Park(car1)
+	if err != nil {
+		t.Fatalf("park setup failed for car1 %v", err)
+	}
+
+	_, err = attendant.Park(car2)
+	if err != nil {
+		t.Fatalf("park setup failed for car2 %v", err)
+	}
+}
