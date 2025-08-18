@@ -20,7 +20,7 @@ func (a *attendant) Unpark(vehicle *vehicle) (*vehicle, error) {
 	}
 
 	for _, lot := range a.lots {
-		if !lot.Isparked(vehicle) {
+		if !lot.isparked(vehicle) {
 			continue
 		}
 		_, err := lot.Unpark(vehicle)
@@ -60,14 +60,14 @@ func NewAttendant(lots ...*lot) (*attendant, error) {
 	l = append(l, lots...)
 	a := &attendant{lots: l, parkingFull: parkingFull}
 	for _, lot := range lots {
-		lot.SubscribeParkingFullStatus(a)
+		lot.AddSubscriberParkingFull(a)
 	}
 	return a, nil
 }
 
 func (a *attendant) isParked(vehicle *vehicle) bool {
 	for _, lot := range a.lots {
-		flag := lot.Isparked(vehicle)
+		flag := lot.isparked(vehicle)
 		if flag {
 			return true
 		}

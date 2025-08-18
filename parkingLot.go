@@ -23,9 +23,8 @@ func (v *vehicle) Equals(vehicleTwo *vehicle) bool {
 }
 
 type lot struct {
-	capacity uint
-	//TODO reveal intention
-	slots                   []*vehicle
+	capacity                uint
+	vehicles                []*vehicle
 	subscribersParkingFull  []ParkingFullReceiver
 	subscriberParkingStatus ParkingStatusReceiver
 	id                      uint
@@ -40,17 +39,14 @@ const (
 )
 
 type ParkingStatusReceiver interface {
-	//todo reveal intention
-	ParkingStatusReceive(status ParkingStatus)
+	Receive(status ParkingStatus)
 }
 
 type ParkingFullReceiver interface {
-	//TODO reveal intention
 	ParkingFullReceive(i uint)
 }
 
-// TODO reveal intention
-func (l *lot) SubscribeParkingFullStatus(subscriber ParkingFullReceiver) {
+func (l *lot) AddSubscriberParkingFull(subscriber ParkingFullReceiver) {
 	l.subscribersParkingFull = append(l.subscribersParkingFull, subscriber)
 }
 
@@ -58,13 +54,13 @@ func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
 	if car == nil {
 		return nil, errors.New("nil vehicle cannot be unparked")
 	}
-	for i := 0; i < len(l.slots); i++ {
+	for i := 0; i < len(l.vehicles); i++ {
 		if l.isFreeSlot(i) {
 			continue
 		}
 		//TODO indentation
-		if l.slots[i].Equals(car) {
-			l.slots[i] = nil
+		if l.vehicles[i].Equals(car) {
+			l.vehicles[i] = nil
 			l.notifyParkingAvailable()
 			return car, nil
 		}
@@ -74,8 +70,8 @@ func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
 
 func (l *lot) notifyParkingAvailable() {
 	vehicleCount := 0
-	for i := 0; i < len(l.slots); i++ {
-		if l.slots[i] != nil {
+	for i := 0; i < len(l.vehicles); i++ {
+		if l.vehicles[i] != nil {
 			vehicleCount++
 		}
 	}
@@ -83,12 +79,12 @@ func (l *lot) notifyParkingAvailable() {
 		return
 	}
 	if l.subscriberParkingStatus != nil {
-		l.subscriberParkingStatus.ParkingStatusReceive(ParkingAvailable)
+		l.subscriberParkingStatus.Receive(ParkingAvailable)
 	}
 }
 
 func (l *lot) isFreeSlot(i int) bool {
-	return l.slots[i] == nil
+	return l.vehicles[i] == nil
 }
 
 func Newlot(capacity uint) (*lot, error) {
@@ -96,7 +92,7 @@ func Newlot(capacity uint) (*lot, error) {
 		return nil, errors.New("capacity can't be zero")
 	}
 	l := make([]*vehicle, capacity)
-	return &lot{capacity: capacity, slots: l}, nil
+	return &lot{capacity: capacity, vehicles: l}, nil
 }
 
 func NewlotV2(id, capacity uint) (*lot, error) {
@@ -110,8 +106,8 @@ func NewlotV2(id, capacity uint) (*lot, error) {
 
 func (l *lot) notifyParkingFull() {
 	vehicleCount := 0
-	for i := 0; i < len(l.slots); i++ {
-		if l.slots[i] != nil {
+	for i := 0; i < len(l.vehicles); i++ {
+		if l.vehicles[i] != nil {
 			vehicleCount++
 		}
 	}
@@ -119,13 +115,10 @@ func (l *lot) notifyParkingFull() {
 		return
 	}
 	if l.subscriberParkingStatus != nil {
-		l.subscriberParkingStatus.ParkingStatusReceive(ParkingFull)
+		l.subscriberParkingStatus.Receive(ParkingFull)
 	}
-	//TODO fewest elements
-	if len(l.subscribersParkingFull) > 0 {
-		for j := 0; j < len(l.subscribersParkingFull); j++ {
-			l.subscribersParkingFull[j].ParkingFullReceive(l.id)
-		}
+	for _, subscriber := range l.subscribersParkingFull {
+		subscriber.ParkingFullReceive(l.id)
 	}
 }
 
@@ -133,15 +126,15 @@ func (l *lot) Park(vehicle *vehicle) (*vehicle, error) {
 	if vehicle == nil {
 		return nil, errors.New("vehicle number is mandatory to park")
 	}
-	//TODO why function is exported?
-	if l.Isparked(vehicle) {
+
+	if l.isparked(vehicle) {
 		return nil, errors.New("car already parked in parking lot")
 	}
 
 	//find available slot
-	for i := 0; i < len(l.slots); i++ {
+	for i := 0; i < len(l.vehicles); i++ {
 		if l.isFreeSlot(i) {
-			l.slots[i] = vehicle
+			l.vehicles[i] = vehicle
 			l.notifyParkingFull()
 			return vehicle, nil
 		}
@@ -149,9 +142,9 @@ func (l *lot) Park(vehicle *vehicle) (*vehicle, error) {
 	return nil, errors.New("parking lot is full")
 }
 
-func (l *lot) Isparked(vehicle *vehicle) bool {
-	for i := 0; i < len(l.slots); i++ {
-		if vehicle.Equals(l.slots[i]) {
+func (l *lot) isparked(vehicle *vehicle) bool {
+	for i := 0; i < len(l.vehicles); i++ {
+		if vehicle.Equals(l.vehicles[i]) {
 			return true
 		}
 	}

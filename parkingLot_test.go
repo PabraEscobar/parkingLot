@@ -124,7 +124,7 @@ func (m *mockParkingFull) ParkingFullReceive(i uint) {
 func TestNotifiedSubscriberThatParkingFullOfCapacityOne(t *testing.T) {
 	parking, _ := Newlot(1)
 	mockSubscriber := &mockParkingFull{}
-	(parking).SubscribeParkingFullStatus(mockSubscriber)
+	(parking).AddSubscriberParkingFull(mockSubscriber)
 	parking.Park(car1)
 	if mockSubscriber.receivedStatus != ParkingFull {
 		t.Errorf("When parking lot is full, parking lot should notify the owner that parking lot is full")
@@ -134,7 +134,7 @@ func TestNotifiedSubscriberThatParkingFullOfCapacityOne(t *testing.T) {
 func TestNotifiedSubscriberThatPakingFull(t *testing.T) {
 	parking, _ := Newlot(2)
 	mockSubscriber := &mockParkingFull{}
-	(parking).SubscribeParkingFullStatus(mockSubscriber)
+	(parking).AddSubscriberParkingFull(mockSubscriber)
 	parking.Park(car1)
 	parking.Park(car2)
 
@@ -146,9 +146,9 @@ func TestNotifiedSubscriberThatPakingFull(t *testing.T) {
 func TestNotifiedSubscribersThatParkingFull(t *testing.T) {
 	parking, _ := Newlot(2)
 	subscriber1 := &mockParkingFull{}
-	(parking).SubscribeParkingFullStatus(subscriber1)
+	(parking).AddSubscriberParkingFull(subscriber1)
 	subscriber2 := &mockParkingFull{}
-	(parking).SubscribeParkingFullStatus(subscriber2)
+	(parking).AddSubscriberParkingFull(subscriber2)
 	parking.Park(car1)
 	parking.Park(car2)
 
@@ -164,7 +164,7 @@ type mockOwner struct {
 	receivedStatus ParkingStatus
 }
 
-func (m *mockOwner) ParkingStatusReceive(status ParkingStatus) {
+func (m *mockOwner) Receive(status ParkingStatus) {
 	m.receivedStatus = status
 }
 
@@ -316,7 +316,7 @@ func TestNewlotv2ShouldNotCreateLotWithZeroCapacity(t *testing.T) {
 func TestNotifiedParkingFullWithLotId(t *testing.T) {
 	l, _ := NewlotV2(1, 1)
 	mockSubscriber := &mockParkingFull{}
-	l.SubscribeParkingFullStatus(mockSubscriber)
+	l.AddSubscriberParkingFull(mockSubscriber)
 	_, err := l.Park(car1)
 	if err != nil {
 		t.Fatalf("park setup failed %v", err)

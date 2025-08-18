@@ -2,7 +2,6 @@ package parking
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 )
 
@@ -37,7 +36,6 @@ func TestAttendantParkVehicle(t *testing.T) {
 		t.Errorf("attendent should park the vehicle")
 	}
 	if !expectedVehicle.Equals(actualVehicle) {
-		fmt.Println(expectedVehicle.number, actualVehicle.number)
 		t.Errorf("vehicle number should be match with provided number")
 	}
 }
