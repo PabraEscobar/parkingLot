@@ -2,6 +2,7 @@ package parking
 
 import (
 	"errors"
+	"math"
 )
 
 type attendant struct {
@@ -44,7 +45,17 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 		return nil, errors.New("car already parked in parking lot")
 	}
 
-	lot, err := a.findAvailableParkinglot()
+	var lot *lot
+	var err error
+
+	if a.id == 1 {
+		lot, err = a.findAvailableParkinglot()
+	}
+
+	if a.id == 2 {
+		lot, err = a.lotWithleastVehicles()
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +76,30 @@ func (a *attendant) findAvailableParkinglot() (*lot, error) {
 		return lot, nil
 	}
 	return nil, errors.New("parking is full")
+}
+
+func (a *attendant) lotWithleastVehicles() (*lot, error) {
+	Count := math.MaxInt
+	lotId := -1
+	for i, lot := range a.lots {
+		if a.parkingFull[i] {
+			continue
+		}
+		vehicleCount := 0
+		for _, vehicle := range lot.vehicles {
+			if vehicle != nil {
+				vehicleCount++
+			}
+		}
+		if Count > vehicleCount {
+			Count = vehicleCount
+			lotId = i
+		}
+	}
+	if lotId == -1 {
+		return nil, errors.New("parking is full")
+	}
+	return a.lots[lotId], nil
 }
 
 func NewAttendant(lots ...*lot) (*attendant, error) {

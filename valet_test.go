@@ -24,6 +24,7 @@ func TestAttendantParkVehicle(t *testing.T) {
 	//initalization
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
+	attendant.id = 1
 	expectedVehicle := car1
 	var actualVehicle *vehicle
 	var err error
@@ -44,6 +45,7 @@ func TestAttendentUnparkVehicle(t *testing.T) {
 	//initalization
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
+	attendant.id = 1
 	expectedVehicle := car1
 	var actualVehicle *vehicle
 	var err error
@@ -65,6 +67,7 @@ func TestAttendantCannotParkWhenParkinFull(t *testing.T) {
 	//initalization
 	lot, _ := Newlot(1)
 	attendant, _ := NewAttendant(lot)
+	attendant.id = 1
 	var actualErr error
 
 	//logic to test
@@ -81,6 +84,7 @@ func TestAttendantCannotParkWhenParkinFull(t *testing.T) {
 func TestAttendantCannotParkVehicleWhichIsAlreadyParked(t *testing.T) {
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
+	attendant.id = 1
 
 	attendant.Park(car1)
 	_, actualErr := attendant.Park(car1)
@@ -94,6 +98,7 @@ func TestAttendantCannotParkVehicleWhichIsAlreadyParked(t *testing.T) {
 func TestAttendantCannotParkNilVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
+	attendant.id = 1
 	attendant.Park(car1)
 	_, actualErr := attendant.Park(nil)
 	expectedErr := errors.New("nil vehicle cannot be parked")
@@ -106,6 +111,7 @@ func TestAttendantCannotParkNilVehicle(t *testing.T) {
 func TestAttendantCannotUnparkNonParkedVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
+	attendant.id = 1
 
 	attendant.Park(car2)
 	_, actualErr := attendant.Unpark(car1)
@@ -129,6 +135,7 @@ func TestAttendantCannotUnparkNilVehicle(t *testing.T) {
 func TestAttendantParksInFirstAvailableSlot(t *testing.T) {
 	lot, _ := Newlot(3)
 	attendant, _ := NewAttendant(lot)
+	attendant.id = 1
 	attendant.Park(car1)
 	attendant.Park(car2)
 
@@ -146,6 +153,7 @@ func TestAttendantParksInFirstAvailableSlot(t *testing.T) {
 func TestParkingVehicleAfterUnparkWhenParkingFull(t *testing.T) {
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
+	attendant.id = 1
 
 	attendant.Park(car1)
 	attendant.Park(car2)
@@ -178,6 +186,7 @@ func TestAttendantCanParkCarInNextLot(t *testing.T) {
 	lot, _ := NewlotV2(0, 1)
 	anotherLot, _ := NewlotV2(1, 1)
 	attendant, _ := NewAttendant(lot, anotherLot)
+	attendant.id = 1
 
 	_, err := attendant.Park(car1)
 	if err != nil {
@@ -198,6 +207,7 @@ func TestAttendantUnparkVehicleParkedInAnyLot(t *testing.T) {
 	lot, _ := NewlotV2(0, 1)
 	anotherLot, _ := NewlotV2(1, 1)
 	attendant, _ := NewAttendant(lot, anotherLot)
+	attendant.id = 1
 
 	_, err := attendant.Park(car1)
 	if err != nil {
@@ -224,6 +234,7 @@ func TestAttendantCanParkSameVehicleAfterUnPark(t *testing.T) {
 	lot, _ := NewlotV2(0, 1)
 	anotherLot, _ := NewlotV2(1, 1)
 	attendant, _ := NewAttendant(lot, anotherLot)
+	attendant.id = 1
 
 	_, err := attendant.Park(car1)
 	if err != nil {
@@ -269,5 +280,52 @@ func TestNewAttendantv2ShouldNotCreateAttendantWithIdOtherThan1and2(t *testing.T
 	_, err := NewAttendantv2(0, lot)
 	if err == nil {
 		t.Fatal("Attendant cannot be created with id other than 1 and 2")
+	}
+}
+
+func TestParkUsingAttendantWithId2(t *testing.T) {
+	lot1, _ := NewlotV2(0, 2)
+	lot2, _ := NewlotV2(1, 2)
+
+	complexAttendant, _ := NewAttendantv2(2, lot1, lot2)
+
+	_, err := complexAttendant.Park(car1)
+	if err != nil {
+		t.Fatalf("park setup failed for car1 %v", err)
+	}
+	_, err = complexAttendant.Park(car2)
+	if err != nil {
+		t.Fatalf("park stup failed for car2 %v", err)
+	}
+
+	if lot2.vehicles[0] == nil {
+		t.Fatal("attendant should park in lot2")
+	}
+}
+
+func TestAttendantWithId2CannotParkVehicleWhenParkingFull(t *testing.T) {
+	lot1, _ := NewlotV2(0, 2)
+	lot2, _ := NewlotV2(1, 1)
+
+	complexAttendant, _ := NewAttendantv2(2, lot1, lot2)
+	car3 := &vehicle{number: "Rj19"}
+	car4 := &vehicle{number: "Rj18"}
+
+	_, err := complexAttendant.Park(car1)
+	if err != nil {
+		t.Fatalf("park setup failed for car1 %v", err)
+	}
+	_, err = complexAttendant.Park(car2)
+	if err != nil {
+		t.Fatalf("park stup failed for car2 %v", err)
+	}
+
+	_, err = complexAttendant.Park(car3)
+	if err != nil {
+		t.Fatalf("park setup failed for car3 %v", err)
+	}
+	_, err = complexAttendant.Park(car4)
+	if err == nil {
+		t.Fatal("car4 cannot be parked parking lot is full")
 	}
 }
