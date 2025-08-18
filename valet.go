@@ -5,6 +5,7 @@ import (
 )
 
 type attendant struct {
+	id          int
 	lots        []*lot
 	parkingFull []bool
 }
@@ -80,6 +81,18 @@ func NewAttendant(lots ...*lot) (*attendant, error) {
 		lot.AddSubscriberParkingFull(a)
 	}
 	return a, nil
+}
+
+func NewAttendantv2(choice int, lots ...*lot) (*attendant, error) {
+	attendant, err := NewAttendant(lots...)
+	if err != nil {
+		return nil, err
+	}
+	if choice != 1 && choice != 2 {
+		return nil, errors.New("invalid choice for attendant creation")
+	}
+	attendant.id = choice
+	return attendant, nil
 }
 
 func (a *attendant) isParked(vehicle *vehicle) bool {

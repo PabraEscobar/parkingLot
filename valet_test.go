@@ -245,3 +245,29 @@ func TestAttendantCanParkSameVehicleAfterUnPark(t *testing.T) {
 		t.Fatalf("park setup failed for car1 after unpark %v", err)
 	}
 }
+
+func TestNewAttendantv2(t *testing.T) {
+	lot, _ := NewlotV2(0, 1)
+	_, err := NewAttendantv2(1, lot)
+	if err != nil {
+		t.Fatal("NewAttendant should be created")
+	}
+}
+
+func TestNewAttendantv2ShouldNotCreateAttendantWithNilLot(t *testing.T) {
+	lot, _ := NewlotV2(0, 1)
+
+	_, err := NewAttendantv2(1, lot, nil)
+	if err == nil {
+		t.Fatal("NewAttendant should be created with empty lot")
+	}
+}
+
+func TestNewAttendantv2ShouldNotCreateAttendantWithIdOtherThan1and2(t *testing.T) {
+	lot, _ := NewlotV2(0, 1)
+
+	_, err := NewAttendantv2(0, lot)
+	if err == nil {
+		t.Fatal("Attendant cannot be created with id other than 1 and 2")
+	}
+}
