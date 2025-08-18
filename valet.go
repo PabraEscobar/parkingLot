@@ -49,7 +49,7 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 	var err error
 
 	if a.id == 1 {
-		lot, err = a.findAvailableParkinglot()
+		lot, err = a.firstEmptylot()
 	}
 
 	if a.id == 2 {
@@ -68,7 +68,7 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 	return vehicle, nil
 }
 
-func (a *attendant) findAvailableParkinglot() (*lot, error) {
+func (a *attendant) firstEmptylot() (*lot, error) {
 	for i, lot := range a.lots {
 		if a.parkingFull[i] {
 			continue
@@ -85,12 +85,7 @@ func (a *attendant) lotWithleastVehicles() (*lot, error) {
 		if a.parkingFull[i] {
 			continue
 		}
-		vehicleCount := 0
-		for _, vehicle := range lot.vehicles {
-			if vehicle != nil {
-				vehicleCount++
-			}
-		}
+		vehicleCount := lot.vehicleCount()
 		if Count > vehicleCount {
 			Count = vehicleCount
 			lotId = i
