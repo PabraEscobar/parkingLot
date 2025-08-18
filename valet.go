@@ -15,6 +15,9 @@ func (a *attendant) ParkingFullReceive(i uint) {
 }
 
 func (a *attendant) Unpark(vehicle *vehicle) (*vehicle, error) {
+	if vehicle == nil {
+		return nil, errors.New("nil vehicle cannot be unparked")
+	}
 	if !a.isParked(vehicle) {
 		return nil, errors.New("vehicle not parked in the parking lot")
 	}
@@ -33,18 +36,32 @@ func (a *attendant) Unpark(vehicle *vehicle) (*vehicle, error) {
 }
 
 func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
+	if vehicle == nil {
+		return nil, errors.New("nil vehicle cannot be parked")
+	}
 	if a.isParked(vehicle) {
 		return nil, errors.New("car already parked in parking lot")
 	}
+
+	lot, err := a.findAvailableParkinglot()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = lot.Park(vehicle)
+	if err != nil {
+		return nil, err
+	}
+
+	return vehicle, nil
+}
+
+func (a *attendant) findAvailableParkinglot() (*lot, error) {
 	for i, lot := range a.lots {
 		if a.parkingFull[i] {
 			continue
 		}
-		_, err := lot.Park(vehicle)
-		if err != nil {
-			return nil, err
-		}
-		return vehicle, nil
+		return lot, nil
 	}
 	return nil, errors.New("parking is full")
 }
@@ -67,8 +84,8 @@ func NewAttendant(lots ...*lot) (*attendant, error) {
 
 func (a *attendant) isParked(vehicle *vehicle) bool {
 	for _, lot := range a.lots {
-		flag := lot.isparked(vehicle)
-		if flag {
+		isParked := lot.isparked(vehicle)
+		if isParked {
 			return true
 		}
 	}

@@ -94,11 +94,12 @@ func TestAttendantCannotParkVehicleWhichIsAlreadyParked(t *testing.T) {
 func TestAttendantCannotParkNilVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
+	attendant.Park(car1)
 	_, actualErr := attendant.Park(nil)
-	expectedErr := errors.New("vehicle number is mandatory to park")
+	expectedErr := errors.New("nil vehicle cannot be parked")
 
 	if actualErr.Error() != expectedErr.Error() {
-		t.Errorf("attendant should not be able to park vehicle with empty number")
+		t.Errorf("attendant should not be able to park nil vehicle")
 	}
 }
 
@@ -117,11 +118,11 @@ func TestAttendantCannotUnparkNonParkedVehicle(t *testing.T) {
 func TestAttendantCannotUnparkNilVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
 	attendant, _ := NewAttendant(lot)
-
 	_, actualErr := attendant.Unpark(nil)
 
-	if actualErr == nil {
-		t.Errorf("attendant should not be able to unpark with empty vehicle number")
+	expectedErr := errors.New("nil vehicle cannot be unparked")
+	if actualErr.Error() != expectedErr.Error() {
+		t.Errorf("attendant should not be able to unpark nil vehicle")
 	}
 }
 
@@ -187,6 +188,10 @@ func TestAttendantCanParkCarInNextLot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("park setup failed for car2 %v", err)
 	}
+
+	if anotherLot.vehicles[0] == nil {
+		t.Fatal("attendant should able to park in another Lot")
+	}
 }
 
 func TestAttendantUnparkVehicleParkedInAnyLot(t *testing.T) {
@@ -207,6 +212,10 @@ func TestAttendantUnparkVehicleParkedInAnyLot(t *testing.T) {
 	_, err = attendant.Unpark(car2)
 	if err != nil {
 		t.Fatalf("unpark setup failed for car2 %v", err)
+	}
+
+	if anotherLot.vehicles[0] != nil {
+		t.Fatal("attendant should able to unpark from another Lot")
 	}
 
 }
