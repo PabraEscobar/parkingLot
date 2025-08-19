@@ -5,15 +5,40 @@ import (
 	"math"
 )
 
+type method uint
+
+const (
+	UnknownMethod method = iota
+	FirstAvailableSlot
+	LeastFilledLot
+)
+
+type LotOperator interface {
+	Park(vehicle *vehicle) (*vehicle, error)
+	Unpark(vehicle *vehicle) (*vehicle, error)
+}
+
 type attendant struct {
 	lots        []*lot
 	parkingFull []bool
-	count       []uint
+	parkingMethod method
 }
 
-// attendant implements ParkingFullReceiver
-func (a *attendant) ParkingFullReceive(i uint) {
-	a.parkingFull[i] = true
+type simpleAttendant struct {
+	*attendant
+}
+
+type complexAttendant struct {
+	*attendant
+}
+
+// attendant implements ParkingStatusReceiver
+func (a *attendant) Receive(id uint, status ParkingStatus) {
+	if status == ParkingAvailable {
+		a.parkingFull[id] = false
+	} else {
+		a.parkingFull[id] = true
+	}
 }
 
 func (a *attendant) Unpark(vehicle *vehicle) (*vehicle, error) {
@@ -32,15 +57,14 @@ func (a *attendant) Unpark(vehicle *vehicle) (*vehicle, error) {
 		if err != nil {
 			return nil, err
 		}
-		if a.count[i] > 0 {
-			a.count[i]--
+		if a.lots[i].count > 0 {
+			a.lots[i].count--
 		}
-		a.parkingFull[lot.id] = false
 	}
 	return vehicle, nil
 }
 
-func (a *attendant) Park(typeOfAttendant uint, vehicle *vehicle) (*vehicle, error) {
+func (a *simpleAttendant) Park(vehicle *vehicle) (*vehicle, error) {
 	if vehicle == nil {
 		return nil, errors.New("nil vehicle cannot be parked")
 	}
@@ -52,11 +76,7 @@ func (a *attendant) Park(typeOfAttendant uint, vehicle *vehicle) (*vehicle, erro
 	var lotId int = -1
 	var err error
 
-	if typeOfAttendant == 1 {
-		lot, lotId, err = a.findAvailableParkinglot()
-	} else {
-		lot, lotId, err = a.findLeastParkedVehiclesLot()
-	}
+	lot, lotId, err = a.findLot()
 
 	if err != nil {
 		return nil, err
@@ -66,18 +86,55 @@ func (a *attendant) Park(typeOfAttendant uint, vehicle *vehicle) (*vehicle, erro
 	if err != nil {
 		return nil, err
 	}
-	a.count[lotId]++
+	a.lots[lotId].count++
 
 	return vehicle, nil
 }
 
-func (a *attendant) findLeastParkedVehiclesLot() (*lot, int, error) {
+func (a *simpleAttendant) findLot() (*lot, int, error) {
+	for i, lot := range a.lots {
+		if a.parkingFull[i] {
+			continue
+		}
+		return lot, i, nil
+	}
+	return nil, -1, errors.New("parking is full")
+}
+
+func (a *complexAttendant) Park(vehicle *vehicle) (*vehicle, error) {
+	if vehicle == nil {
+		return nil, errors.New("nil vehicle cannot be parked")
+	}
+	if a.isParked(vehicle) {
+		return nil, errors.New("car already parked in parking lot")
+	}
+
+	var lot *lot
+	var lotId int = -1
+	var err error
+
+	lot, lotId, err = a.findLot()
+
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = lot.Park(vehicle)
+	if err != nil {
+		return nil, err
+	}
+	a.lots[lotId].count++
+
+	return vehicle, nil
+}
+
+func (a *complexAttendant) findLot() (*lot, int, error) {
 	minimumCount := math.MaxInt64
 	var lotWithLeastFilledSlots *lot
 	var lotId int = -1
 	for i, lot := range a.lots {
-		if !a.parkingFull[i] && a.count[i] < uint(minimumCount) {
-			minimumCount = int(a.count[i])
+		if !a.parkingFull[i] && a.lots[i].count < uint(minimumCount) {
+			minimumCount = int(a.lots[i].count)
 			lotWithLeastFilledSlots = lot
 			lotId = i
 		}
@@ -88,17 +145,7 @@ func (a *attendant) findLeastParkedVehiclesLot() (*lot, int, error) {
 	return nil, -1, errors.New("parking is full")
 }
 
-func (a *attendant) findAvailableParkinglot() (*lot, int, error) {
-	for i, lot := range a.lots {
-		if a.parkingFull[i] {
-			continue
-		}
-		return lot, i, nil
-	}
-	return nil, -1, errors.New("parking is full")
-}
-
-func NewAttendant(lots ...*lot) (*attendant, error) {
+func NewAttendant(parkingMethod uint, lots ...*lot) (LotOperator, error) {
 	for _, lot := range lots {
 		if lot == nil {
 			return nil, errors.New("attendant does not exist without parking lot")
@@ -107,9 +154,15 @@ func NewAttendant(lots ...*lot) (*attendant, error) {
 	l := make([]*lot, 0, len(lots))
 	parkingFull := make([]bool, len(lots)+1)
 	l = append(l, lots...)
-	a := &attendant{lots: l, parkingFull: parkingFull, count: make([]uint, len(lots))}
+	valet := &attendant{lots: l, parkingFull: parkingFull, parkingMethod: method(parkingMethod)}
+	var a LotOperator
+	if parkingMethod == uint(FirstAvailableSlot) {
+		a = &simpleAttendant{valet}
+	} else {
+		a = &complexAttendant{valet}
+	}
 	for _, lot := range lots {
-		lot.AddSubscriberParkingFull(a)
+		lot.AddSubscriberParkingStatus(valet)
 	}
 	return a, nil
 }

@@ -7,14 +7,14 @@ import (
 
 func TestNewAttendant(t *testing.T) {
 	lot, _ := Newlot(2)
-	_, err := NewAttendant(lot)
+	_, err := NewAttendant(0, lot)
 	if err != nil {
 		t.Errorf("Attendant should be exist with parking lot")
 	}
 }
 
 func TestNewAttendantCannotExistWithNilLot(t *testing.T) {
-	_, err := NewAttendant(nil)
+	_, err := NewAttendant(1, nil)
 	if err == nil {
 		t.Errorf("Attendant should not exist without the parking lot")
 	}
@@ -23,13 +23,13 @@ func TestNewAttendantCannotExistWithNilLot(t *testing.T) {
 func TestAttendantParkVehicle(t *testing.T) {
 	//initalization
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
+	attendant, _ := NewAttendant(1, lot)
 	expectedVehicle := car1
 	var actualVehicle *vehicle
 	var err error
 
 	//logic to test
-	actualVehicle, err = attendant.Park(1, car1)
+	actualVehicle, err = attendant.Park(car1)
 
 	//assertions
 	if err != nil {
@@ -43,13 +43,13 @@ func TestAttendantParkVehicle(t *testing.T) {
 func TestAttendentUnparkVehicle(t *testing.T) {
 	//initalization
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
+	attendant, _ := NewAttendant(1, lot)
 	expectedVehicle := car1
 	var actualVehicle *vehicle
 	var err error
 
 	//logic to test
-	_, _ = attendant.Park(1, car1)
+	_, _ = attendant.Park(car1)
 	actualVehicle, err = attendant.Unpark(car1)
 
 	//assertions
@@ -64,12 +64,12 @@ func TestAttendentUnparkVehicle(t *testing.T) {
 func TestAttendantCannotParkWhenParkinFull(t *testing.T) {
 	//initalization
 	lot, _ := Newlot(1)
-	attendant, _ := NewAttendant(lot)
+	attendant, _ := NewAttendant(1, lot)
 	var actualErr error
 
 	//logic to test
-	attendant.Park(1, car1)
-	_, actualErr = attendant.Park(1, car2)
+	attendant.Park(car1)
+	_, actualErr = attendant.Park(car2)
 	expectedErr := errors.New("parking is full")
 
 	//assertions
@@ -80,10 +80,10 @@ func TestAttendantCannotParkWhenParkinFull(t *testing.T) {
 
 func TestAttendantCannotParkVehicleWhichIsAlreadyParked(t *testing.T) {
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
+	attendant, _ := NewAttendant(1, lot)
 
-	attendant.Park(1, car1)
-	_, actualErr := attendant.Park(1, car1)
+	attendant.Park(car1)
+	_, actualErr := attendant.Park(car1)
 	expectedErr := errors.New("car already parked in parking lot")
 
 	if actualErr.Error() != expectedErr.Error() {
@@ -93,9 +93,9 @@ func TestAttendantCannotParkVehicleWhichIsAlreadyParked(t *testing.T) {
 
 func TestAttendantCannotParkNilVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
-	attendant.Park(1, car1)
-	_, actualErr := attendant.Park(1, nil)
+	attendant, _ := NewAttendant(1, lot)
+	attendant.Park(car1)
+	_, actualErr := attendant.Park(nil)
 	expectedErr := errors.New("nil vehicle cannot be parked")
 
 	if actualErr.Error() != expectedErr.Error() {
@@ -105,9 +105,9 @@ func TestAttendantCannotParkNilVehicle(t *testing.T) {
 
 func TestAttendantCannotUnparkNonParkedVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
+	attendant, _ := NewAttendant(1, lot)
 
-	attendant.Park(1, car2)
+	attendant.Park(car2)
 	_, actualErr := attendant.Unpark(car1)
 	expectedErr := errors.New("vehicle not parked in the parking lot")
 	if actualErr.Error() != expectedErr.Error() {
@@ -117,7 +117,7 @@ func TestAttendantCannotUnparkNonParkedVehicle(t *testing.T) {
 
 func TestAttendantCannotUnparkNilVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
+	attendant, _ := NewAttendant(1, lot)
 	_, actualErr := attendant.Unpark(nil)
 
 	expectedErr := errors.New("nil vehicle cannot be unparked")
@@ -128,15 +128,15 @@ func TestAttendantCannotUnparkNilVehicle(t *testing.T) {
 
 func TestAttendantParksInFirstAvailableSlot(t *testing.T) {
 	lot, _ := Newlot(3)
-	attendant, _ := NewAttendant(lot)
-	attendant.Park(1, car1)
-	attendant.Park(1, car2)
+	attendant, _ := NewAttendant(1, lot)
+	attendant.Park(car1)
+	attendant.Park(car2)
 
 	_, err2 := attendant.Unpark(car1)
 	if err2 != nil {
 		t.Error(err2)
 	}
-	actualVehicle, err1 := attendant.Park(1, car1)
+	actualVehicle, err1 := attendant.Park(car1)
 	expectedVehicle := car1
 	if !expectedVehicle.Equals(actualVehicle) {
 		t.Errorf("vehicle should be parked in the first available slot %v", err1)
@@ -145,13 +145,13 @@ func TestAttendantParksInFirstAvailableSlot(t *testing.T) {
 
 func TestParkingVehicleAfterUnparkWhenParkingFull(t *testing.T) {
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
+	attendant, _ := NewAttendant(1, lot)
 
-	attendant.Park(1, car1)
-	attendant.Park(1, car2)
+	attendant.Park(car1)
+	attendant.Park(car2)
 
 	attendant.Unpark(car1)
-	_, err := attendant.Park(1, car1)
+	_, err := attendant.Park(car1)
 	if err != nil {
 		t.Errorf("attendent should able to park the vehicle : %v", err)
 	}
@@ -163,13 +163,13 @@ func TestAttendantManageMultipleLot(t *testing.T) {
 	anotherLot, _ := NewlotV2(2, 1)
 
 	//business logic
-	attendant, err := NewAttendant(lot, anotherLot)
+	attendant, err := NewAttendant(1, lot, anotherLot)
 
 	//assertions
 	if err != nil {
 		t.Fatal("attendant should be created with multiple lots")
 	}
-	if len(attendant.lots) != 2 {
+	if len(attendant.(*simpleAttendant).lots) != 2 {
 		t.Fatal("attendant should have 2 lots")
 	}
 }
@@ -177,14 +177,14 @@ func TestAttendantManageMultipleLot(t *testing.T) {
 func TestAttendantCanParkCarInNextLot(t *testing.T) {
 	lot, _ := NewlotV2(0, 1)
 	anotherLot, _ := NewlotV2(1, 1)
-	attendant, _ := NewAttendant(lot, anotherLot)
+	attendant, _ := NewAttendant(1, lot, anotherLot)
 
-	_, err := attendant.Park(1, car1)
+	_, err := attendant.Park(car1)
 	if err != nil {
 		t.Fatalf("park setup failed for car1 %v", err)
 	}
 
-	_, err = attendant.Park(1, car2)
+	_, err = attendant.Park(car2)
 	if err != nil {
 		t.Fatalf("park setup failed for car2 %v", err)
 	}
@@ -197,14 +197,14 @@ func TestAttendantCanParkCarInNextLot(t *testing.T) {
 func TestAttendantUnparkVehicleParkedInAnyLot(t *testing.T) {
 	lot, _ := NewlotV2(0, 1)
 	anotherLot, _ := NewlotV2(1, 1)
-	attendant, _ := NewAttendant(lot, anotherLot)
+	attendant, _ := NewAttendant(1, lot, anotherLot)
 
-	_, err := attendant.Park(1, car1)
+	_, err := attendant.Park(car1)
 	if err != nil {
 		t.Fatalf("park setup failed for car1 %v", err)
 	}
 
-	_, err = attendant.Park(1, car2)
+	_, err = attendant.Park(car2)
 	if err != nil {
 		t.Fatalf("park setup failed for car2 %v", err)
 	}
@@ -223,14 +223,14 @@ func TestAttendantUnparkVehicleParkedInAnyLot(t *testing.T) {
 func TestAttendantCanParkSameVehicleAfterUnPark(t *testing.T) {
 	lot, _ := NewlotV2(0, 1)
 	anotherLot, _ := NewlotV2(1, 1)
-	attendant, _ := NewAttendant(lot, anotherLot)
+	attendant, _ := NewAttendant(1, lot, anotherLot)
 
-	_, err := attendant.Park(1, car1)
+	_, err := attendant.Park(car1)
 	if err != nil {
 		t.Fatalf("park setup failed for car1 %v", err)
 	}
 
-	_, err = attendant.Park(1, car2)
+	_, err = attendant.Park(car2)
 	if err != nil {
 		t.Fatalf("park setup failed for car2 %v", err)
 	}
@@ -240,7 +240,7 @@ func TestAttendantCanParkSameVehicleAfterUnPark(t *testing.T) {
 		t.Fatalf("unpark setup failed for car1 %v", err)
 	}
 
-	_, err = attendant.Park(1, car1)
+	_, err = attendant.Park(car1)
 	if err != nil {
 		t.Fatalf("park setup failed for car1 after unpark %v", err)
 	}
@@ -252,25 +252,28 @@ func TestBalancedAttendantParkVehicleInLeastFilledLot(t *testing.T) {
 	secondLot, _ := NewlotV2(1, 3)
 
 	//business logic
-	balancedAttendant, err := NewAttendant(firstLot, secondLot)
+	balancedAttendant, err := NewAttendant(uint(LeastFilledLot), firstLot, secondLot)
 
 	//assertions
 	if err != nil {
 		t.Fatal("attendant should be created with multiple lots")
 	}
-	if len(balancedAttendant.lots) != 2 {
+	if len(balancedAttendant.(*complexAttendant).lots) != 2 {
 		t.Fatal("attendant should have 2 lots")
 	}
 
 	//logic to test
-	balancedAttendant.Park(2, car1)
-	_, actualErr := balancedAttendant.Park(2, car2)
+	balancedAttendant.Park(car1)
+	_, actualErr := balancedAttendant.Park(car2)
 
 	if actualErr != nil {
 		t.Fatal("car2 should be parked")
 	}
 	if secondLot.vehicles[0] == nil {
 		t.Fatal("balanced attendant should park in the second lot")
+	}
+	if car2.Equals(secondLot.vehicles[0]) == false {
+		t.Fatal("balanced attendant should park in the first slot of second lot")
 	}
 }
 
@@ -280,24 +283,24 @@ func TestBalancedAttendantCannotParkVehicleWhenParkingIsFull(t *testing.T) {
 	anotherLot, _ := NewlotV2(1, 1)
 
 	//business logic
-	balancedAttendant, err := NewAttendant(lot, anotherLot)
+	balancedAttendant, err := NewAttendant(uint(LeastFilledLot), lot, anotherLot)
 
 	//assertions
 	if err != nil {
 		t.Fatal("attendant should be created with multiple lots")
 	}
-	if len(balancedAttendant.lots) != 2 {
+	if len(balancedAttendant.(*complexAttendant).lots) != 2 {
 		t.Fatal("attendant should have 2 lots")
 	}
 
 	//logic to test
-	balancedAttendant.Park(2, car1)
-	balancedAttendant.Park(2, car2)
+	balancedAttendant.Park(car1)
+	balancedAttendant.Park(car2)
 
 	car3, _ := NewVehicle("MH14FG4567")
 
 	expectedErr := errors.New("parking is full")
-	_, actualErr := balancedAttendant.Park(2, car3)
+	_, actualErr := balancedAttendant.Park(car3)
 
 	if actualErr == expectedErr {
 		t.Fatal("car3 cannot be parked when parking lot is full")
@@ -307,61 +310,68 @@ func TestBalancedAttendantCannotParkVehicleWhenParkingIsFull(t *testing.T) {
 
 func TestBalancedAttendantParkVehicleInFirstOrderWhenMultipleLotsHaveLeastFilled(t *testing.T) {
 	//intialization
-	fitrstLot, _ := NewlotV2(0, 3)
+	firstLot, _ := NewlotV2(0, 3)
 	secondLot, _ := NewlotV2(1, 3)
 	thirdLot, _ := NewlotV2(2, 3)
 
 	//business logic
-	balancedAttendant, err := NewAttendant(fitrstLot, secondLot, thirdLot)
+	balancedAttendant, err := NewAttendant(uint(LeastFilledLot), firstLot, secondLot, thirdLot)
 
 	//assertions
 	if err != nil {
 		t.Fatal("attendant should be created with multiple lots")
 	}
-	if len(balancedAttendant.lots) != 3 {
+	if len(balancedAttendant.(*complexAttendant).lots) != 3 {
 		t.Fatal("attendant should have 3 lots")
 	}
 
 	//logic to test
-	balancedAttendant.Park(1, car1)
-	balancedAttendant.Park(1, car2)
+	balancedAttendant.Park(car1)
+	balancedAttendant.Park(car2)
 
 	car3, _ := NewVehicle("MH14FG4567")
 
-	_, actualErr := balancedAttendant.Park(2, car3)
+	_, actualErr := balancedAttendant.Park(car3)
 
 	if actualErr != nil {
 		t.Fatal("car3 cannot be parked when parking lot is full")
 	}
 	if secondLot.vehicles[0] == nil {
 		t.Fatal("car3 should be parked in the second lot as the first order with the least filled slots")
+	}
+	if car3.Equals(secondLot.vehicles[0]) {
+		t.Fatal("car3 should be parked in the first slot of second lot")
 	}
 }
 
 func TestBothAttendantParkVehicle(t *testing.T) {
 	//intialization
-	fitrstLot, _ := NewlotV2(0, 3)
+	firstLot, _ := NewlotV2(0, 3)
 	secondLot, _ := NewlotV2(1, 3)
 	thirdLot, _ := NewlotV2(2, 3)
 
 	//business logic
-	balancedAttendant, err := NewAttendant(fitrstLot, secondLot, thirdLot)
+	fasAttendant, _ := NewAttendant(uint(FirstAvailableSlot), firstLot, secondLot, thirdLot)
+	balancedAttendant, err := NewAttendant(uint(LeastFilledLot), firstLot, secondLot, thirdLot)
 
 	//assertions
 	if err != nil {
 		t.Fatal("attendant should be created with multiple lots")
 	}
-	if len(balancedAttendant.lots) != 3 {
-		t.Fatal("attendant should have 3 lots")
+	if len(fasAttendant.(*simpleAttendant).lots) != 3 {
+		t.Fatal("simple attendant should have 3 lots")
+	}
+	if len(balancedAttendant.(*complexAttendant).lots) != 3 {
+		t.Fatal("balanced attendant should have 3 lots")
 	}
 
 	//logic to test
-	balancedAttendant.Park(1, car1)
-	balancedAttendant.Park(1, car2)
+	fasAttendant.Park(car1)
+	fasAttendant.Park(car2)
 
 	car3, _ := NewVehicle("MH14FG4567")
 
-	_, actualErr := balancedAttendant.Park(2, car3)
+	_, actualErr := balancedAttendant.Park(car3)
 
 	if actualErr != nil {
 		t.Fatal("car3 cannot be parked when parking lot is full")
@@ -369,4 +379,55 @@ func TestBothAttendantParkVehicle(t *testing.T) {
 	if secondLot.vehicles[0] == nil {
 		t.Fatal("car3 should be parked in the second lot as the first order with the least filled slots")
 	}
+
+	if car3.Equals(secondLot.vehicles[0]) == false {
+		t.Fatal("car3 should be parked in the first slot of second lot")
+	}
+}
+
+func TestTimePass(t *testing.T) {
+    lot1, _ := NewlotV2(0, 2)
+    lot2, _ := NewlotV2(1, 2)
+
+    car3 := &vehicle{number: "car3"}
+    car4 := &vehicle{number: "car4"}
+
+    simpleAttendant, _ := NewAttendant(uint(FirstAvailableSlot), lot1, lot2)
+    complexAttendant, _ := NewAttendant(uint(LeastFilledLot), lot1, lot2)
+    _, err := simpleAttendant.Park(car1)
+    if err != nil {
+        t.Fatalf("park setup failed for car1 %v", err)
+    }
+
+    _, err = simpleAttendant.Park(car2)
+    if err != nil {
+        t.Fatalf("park stup failed for car2 %v", err)
+    }
+
+    if car1.Equals(lot1.vehicles[0]) == false {
+        t.Fatal("attendant should park in lot1")
+    }
+    _, err = complexAttendant.Park(car3)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    _, err = simpleAttendant.Unpark(car1)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    _, err = simpleAttendant.Unpark(car2)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    _, err = complexAttendant.Park(car4)
+
+    if err != nil {
+        t.Fatal(err)
+    }
+    if car4.Equals(lot1.vehicles[0])  == false{
+        t.Fatalf("car should have been parked in first slot but was parked in lot 2 %v", lot2.vehicles[1])
+    }
 }
