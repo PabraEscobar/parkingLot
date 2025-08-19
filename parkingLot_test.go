@@ -161,23 +161,27 @@ func TestNotifiedSubscribersThatParkingFull(t *testing.T) {
 }
 
 type mockOwner struct {
+	id             uint
 	receivedStatus ParkingStatus
 }
 
-func (m *mockOwner) Receive(status ParkingStatus) {
+func (m *mockOwner) Receive(status ParkingStatus, i uint) {
 	m.receivedStatus = status
+	m.id = i
 }
 
 type mockParkingStatusReceiver struct {
+	id             uint
 	receivedStatus ParkingStatus
 }
 
-func (m *mockParkingStatusReceiver) Receive(status ParkingStatus) {
+func (m *mockParkingStatusReceiver) Receive(status ParkingStatus, i uint) {
 	m.receivedStatus = status
+	m.id = i
 }
 
 func TestOnlyNotifiedToOwnerThatParkingAvailableAndFull(t *testing.T) {
-	parking, _ := Newlot(2)
+	parking, _ := NewlotV2(0, 2)
 	owner := &mockOwner{}
 	subscriber := &mockParkingStatusReceiver{}
 	parking.AddSubscriberParkingStatus(owner)
@@ -187,8 +191,14 @@ func TestOnlyNotifiedToOwnerThatParkingAvailableAndFull(t *testing.T) {
 	if owner.receivedStatus != ParkingFull {
 		t.Errorf("owner is not notified that parking is Full")
 	}
+	if owner.id != 0 {
+		t.Errorf("owner is receiving wrong lot id : %v", owner.id)
+	}
 	if subscriber.receivedStatus != ParkingFull {
 		t.Errorf("owner is not notified that parking is Full")
+	}
+	if subscriber.id != 0 {
+		t.Errorf("owner is receiving wrong lot id : %v", subscriber.id)
 	}
 	parking.Unpark(car2)
 	if owner.receivedStatus != ParkingAvailable {

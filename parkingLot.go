@@ -39,7 +39,7 @@ const (
 )
 
 type ParkingStatusReceiver interface {
-	Receive(status ParkingStatus)
+	Receive(status ParkingStatus, id uint)
 }
 
 type ParkingFullReceiver interface {
@@ -83,7 +83,7 @@ func (l *lot) notifyParkingAvailable() {
 		return
 	}
 	for _, subscriber := range l.subscribersParkingStatus {
-		subscriber.Receive(ParkingAvailable)
+		subscriber.Receive(ParkingAvailable, l.id)
 	}
 }
 
@@ -119,7 +119,7 @@ func (l *lot) notifyParkingFull() {
 		return
 	}
 	for _, subscriber := range l.subscribersParkingStatus {
-		subscriber.Receive(ParkingFull)
+		subscriber.Receive(ParkingFull, l.id)
 	}
 	for _, subscriber := range l.subscribersParkingFull {
 		subscriber.ParkingFullReceive(l.id)
