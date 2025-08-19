@@ -2,11 +2,13 @@ package parking
 
 import (
 	"errors"
+	"math"
 )
 
 type attendant struct {
 	lots        []*lot
 	parkingFull []bool
+	count       []uint
 }
 
 // attendant implements ParkingFullReceiver
@@ -22,7 +24,7 @@ func (a *attendant) Unpark(vehicle *vehicle) (*vehicle, error) {
 		return nil, errors.New("vehicle not parked in the parking lot")
 	}
 
-	for _, lot := range a.lots {
+	for i, lot := range a.lots {
 		if !lot.isparked(vehicle) {
 			continue
 		}
@@ -30,12 +32,15 @@ func (a *attendant) Unpark(vehicle *vehicle) (*vehicle, error) {
 		if err != nil {
 			return nil, err
 		}
+		if a.count[i] > 0 {
+			a.count[i]--
+		}
 		a.parkingFull[lot.id] = false
 	}
 	return vehicle, nil
 }
 
-func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
+func (a *attendant) Park(typeOfAttendant uint, vehicle *vehicle) (*vehicle, error) {
 	if vehicle == nil {
 		return nil, errors.New("nil vehicle cannot be parked")
 	}
@@ -43,7 +48,16 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 		return nil, errors.New("car already parked in parking lot")
 	}
 
-	lot, err := a.findAvailableParkinglot()
+	var lot *lot
+	var lotId int = -1
+	var err error
+
+	if typeOfAttendant == 1 {
+		lot, lotId, err = a.findAvailableParkinglot()
+	} else {
+		lot, lotId, err = a.findLeastParkedVehiclesLot()
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -52,18 +66,36 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 	if err != nil {
 		return nil, err
 	}
+	a.count[lotId]++
 
 	return vehicle, nil
 }
 
-func (a *attendant) findAvailableParkinglot() (*lot, error) {
+func (a *attendant) findLeastParkedVehiclesLot() (*lot, int, error) {
+	minimumCount := math.MaxInt64
+	var lotWithLeastFilledSlots *lot
+	var lotId int = -1
+	for i, lot := range a.lots {
+		if !a.parkingFull[i] && a.count[i] < uint(minimumCount) {
+			minimumCount = int(a.count[i])
+			lotWithLeastFilledSlots = lot
+			lotId = i
+		}
+	}
+	if lotWithLeastFilledSlots != nil {
+		return lotWithLeastFilledSlots, lotId, nil
+	}
+	return nil, -1, errors.New("parking is full")
+}
+
+func (a *attendant) findAvailableParkinglot() (*lot, int, error) {
 	for i, lot := range a.lots {
 		if a.parkingFull[i] {
 			continue
 		}
-		return lot, nil
+		return lot, i, nil
 	}
-	return nil, errors.New("parking is full")
+	return nil, -1, errors.New("parking is full")
 }
 
 func NewAttendant(lots ...*lot) (*attendant, error) {
@@ -75,7 +107,7 @@ func NewAttendant(lots ...*lot) (*attendant, error) {
 	l := make([]*lot, 0, len(lots))
 	parkingFull := make([]bool, len(lots)+1)
 	l = append(l, lots...)
-	a := &attendant{lots: l, parkingFull: parkingFull}
+	a := &attendant{lots: l, parkingFull: parkingFull, count: make([]uint, len(lots))}
 	for _, lot := range lots {
 		lot.AddSubscriberParkingFull(a)
 	}
