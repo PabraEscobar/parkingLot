@@ -57,17 +57,7 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 		return nil, errors.New("car already parked in parking lot")
 	}
 
-	var lot *lot
-	var err error
-
-	//TODO remove both if condition checks on every park call
-	if a.plan == Simple {
-		lot, err = a.firstEmptylot()
-	}
-
-	if a.plan == Complex {
-		lot, err = a.lotWithleastVehicles()
-	}
+	lot, err := a.plan.availableLot(a)
 
 	if err != nil {
 		return nil, err
@@ -79,6 +69,13 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 	}
 
 	return vehicle, nil
+}
+
+func (p Plan) availableLot(a *attendant) (*lot, error) {
+	if p == Simple {
+		return a.firstEmptylot()
+	}
+	return a.lotWithleastVehicles()
 }
 
 func (a *attendant) firstEmptylot() (*lot, error) {
