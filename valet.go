@@ -5,15 +5,15 @@ import (
 	"math"
 )
 
-type Plan int
+type ParkingPlan int
 
 const (
-	Simple Plan = iota
+	Simple ParkingPlan = iota
 	Complex
 )
 
 type attendant struct {
-	plan           Plan
+	plan           ParkingPlan
 	lots           []*lot
 	lotsFullStatus []bool
 }
@@ -71,7 +71,7 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 	return vehicle, nil
 }
 
-func (p Plan) availableLot(a *attendant) (*lot, error) {
+func (p ParkingPlan) availableLot(a *attendant) (*lot, error) {
 	if p == Simple {
 		return a.firstEmptylot()
 	}
@@ -124,7 +124,7 @@ func NewAttendant(lots ...*lot) (*attendant, error) {
 	return a, nil
 }
 
-func NewAttendantv2(plan Plan, lots ...*lot) (*attendant, error) {
+func NewAttendantv2(plan ParkingPlan, lots ...*lot) (*attendant, error) {
 	attendant, err := NewAttendant(lots...)
 	if err != nil {
 		return nil, err
