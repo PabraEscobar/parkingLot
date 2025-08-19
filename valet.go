@@ -5,20 +5,20 @@ import (
 	"math"
 )
 
-type availableLot func(a *attendant) (*lot, error)
+type findAvailableLot func(a *attendant) (*lot, error)
 
 type ParkingPlan int
 
 const (
-	Simple ParkingPlan = iota
-	Complex
+	ParkInFirstEmptyLot ParkingPlan = iota
+	ParkInLeastFilledLot
 )
 
 type attendant struct {
-	availablelot   availableLot
-	plan           ParkingPlan
-	lots           []*lot
-	lotsFullStatus []bool
+	availableLotForPark findAvailableLot
+	approach            ParkingPlan
+	lots                []*lot
+	lotsFullStatus      []bool
 }
 
 // attendant implements ParkingFullReceiver
@@ -60,7 +60,7 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 		return nil, errors.New("car already parked in parking lot")
 	}
 
-	availablelot := a.availablelot
+	availablelot := a.availableLotForPark
 	lot, err := availablelot(a)
 
 	if err != nil {
@@ -75,7 +75,7 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 	return vehicle, nil
 }
 
-func firstEmptylot(a *attendant) (*lot, error) {
+func findFirstEmptylot(a *attendant) (*lot, error) {
 	for i, lot := range a.lots {
 		if a.lotsFullStatus[i] {
 			continue
@@ -85,7 +85,7 @@ func firstEmptylot(a *attendant) (*lot, error) {
 	return nil, errors.New("parking is full")
 }
 
-func lotWithleastVehicles(a *attendant) (*lot, error) {
+func findLotWithleastVehicles(a *attendant) (*lot, error) {
 	Count := math.MaxInt
 	lotId := -1
 	for i, lot := range a.lots {
@@ -126,11 +126,11 @@ func NewAttendantv2(plan ParkingPlan, lots ...*lot) (*attendant, error) {
 	if err != nil {
 		return nil, err
 	}
-	attendant.plan = plan
-	if plan == Simple {
-		attendant.availablelot = firstEmptylot
+	attendant.approach = plan
+	if plan == ParkInFirstEmptyLot {
+		attendant.availableLotForPark = findFirstEmptylot
 	} else {
-		attendant.availablelot = lotWithleastVehicles
+		attendant.availableLotForPark = findLotWithleastVehicles
 	}
 	return attendant, nil
 }
