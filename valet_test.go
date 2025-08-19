@@ -320,3 +320,51 @@ func TestAttendantWithComplexPlanCannotParkVehicleWhenParkingFull(t *testing.T) 
 		t.Fatal("car4 cannot be parked parking lot is full")
 	}
 }
+
+func TestBothAttendantShouldBeAbleToParkAndUnpark(t *testing.T) {
+	lot1, _ := NewlotV2(0, 2)
+	lot2, _ := NewlotV2(1, 2)
+
+	car3 := &vehicle{number: "car3"}
+	car4 := &vehicle{number: "car4"}
+
+	simpleAttendant, _ := NewAttendantv2(Simple, lot1, lot2)
+	complexAttendant, _ := NewAttendantv2(Complex, lot1, lot2)
+
+	_, err := simpleAttendant.Park(car1)
+	if err != nil {
+		t.Fatalf("park setup failed for car1 %v", err)
+	}
+
+	_, err = simpleAttendant.Park(car2)
+	if err != nil {
+		t.Fatalf("park stup failed for car2 by simpleAttendant %v", err)
+	}
+
+	if car1.Equals(lot1.vehicles[0]) == false {
+		t.Fatal("attendant should park car1 in lot1")
+	}
+
+	_, err = complexAttendant.Park(car3)
+	if err != nil {
+		t.Fatalf("Park setup failed for car3 by complexAttendant %v", err)
+	}
+
+	_, err = simpleAttendant.Unpark(car1)
+	if err != nil {
+		t.Fatalf("unpark setup failed for car1 by simpleAttendant %v", err)
+	}
+
+	_, err = complexAttendant.Unpark(car2)
+	if err != nil {
+		t.Fatalf("unpark setup failed for car2 by complexAttendant %v", err)
+	}
+
+	_, err = complexAttendant.Park(car4)
+	if err != nil {
+		t.Fatalf("Park setup failed for car2 by complexAttendant %v", err)
+	}
+	if car4.Equals(lot1.vehicles[0]) == false {
+		t.Fatalf("car should have been parked in first slot but was parked in lot 2 %v", lot2.vehicles[1])
+	}
+}
