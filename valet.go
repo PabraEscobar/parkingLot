@@ -6,8 +6,10 @@ import (
 )
 
 type attendant struct {
+//TODO reveal intention
 	id          int
 	lots        []*lot
+	//TODO reveal intention lots is plural and has array but here it is singular but array, fix is not a suffix s but come up with better name
 	parkingFull []bool
 }
 
@@ -48,6 +50,7 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 	var lot *lot
 	var err error
 
+	//TODO remove both if condition checks on every park call
 	if a.id == 1 {
 		lot, err = a.firstEmptylot()
 	}
