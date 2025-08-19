@@ -13,20 +13,19 @@ const (
 )
 
 type attendant struct {
-	plan Plan
-	lots []*lot
-	//TODO reveal intention lots is plural and has array but here it is singular but array, fix is not a suffix s but come up with better name
-	parkingFull []bool
+	plan           Plan
+	lots           []*lot
+	lotsFullStatus []bool
 }
 
 // attendant implements ParkingFullReceiver
 func (a *attendant) ParkingFullReceive(i uint) {
-	a.parkingFull[i] = true
+	a.lotsFullStatus[i] = true
 }
 
 func (a *attendant) Receive(status ParkingStatus, i uint) {
 	if status == ParkingAvailable {
-		a.parkingFull[i] = false
+		a.lotsFullStatus[i] = false
 	}
 }
 
@@ -84,7 +83,7 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 
 func (a *attendant) firstEmptylot() (*lot, error) {
 	for i, lot := range a.lots {
-		if a.parkingFull[i] {
+		if a.lotsFullStatus[i] {
 			continue
 		}
 		return lot, nil
@@ -96,7 +95,7 @@ func (a *attendant) lotWithleastVehicles() (*lot, error) {
 	Count := math.MaxInt
 	lotId := -1
 	for i, lot := range a.lots {
-		if a.parkingFull[i] {
+		if a.lotsFullStatus[i] {
 			continue
 		}
 		vehicleCount := lot.vehicleCount()
@@ -120,7 +119,7 @@ func NewAttendant(lots ...*lot) (*attendant, error) {
 	l := make([]*lot, 0, len(lots))
 	parkingFull := make([]bool, len(lots)+1)
 	l = append(l, lots...)
-	a := &attendant{lots: l, parkingFull: parkingFull}
+	a := &attendant{lots: l, lotsFullStatus: parkingFull}
 	for _, lot := range lots {
 		lot.AddSubscriberParkingFull(a)
 		lot.AddSubscriberParkingStatus(a)
