@@ -5,6 +5,8 @@ import (
 	"math"
 )
 
+type availableLot func(a *attendant) (*lot, error)
+
 type ParkingPlan int
 
 const (
@@ -13,6 +15,7 @@ const (
 )
 
 type attendant struct {
+	availablelot   availableLot
 	plan           ParkingPlan
 	lots           []*lot
 	lotsFullStatus []bool
@@ -57,7 +60,8 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 		return nil, errors.New("car already parked in parking lot")
 	}
 
-	lot, err := a.plan.availableLot(a)
+	availablelot := a.availablelot
+	lot, err := availablelot(a)
 
 	if err != nil {
 		return nil, err
@@ -71,14 +75,7 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 	return vehicle, nil
 }
 
-func (p ParkingPlan) availableLot(a *attendant) (*lot, error) {
-	if p == Simple {
-		return a.firstEmptylot()
-	}
-	return a.lotWithleastVehicles()
-}
-
-func (a *attendant) firstEmptylot() (*lot, error) {
+func firstEmptylot(a *attendant) (*lot, error) {
 	for i, lot := range a.lots {
 		if a.lotsFullStatus[i] {
 			continue
@@ -88,7 +85,7 @@ func (a *attendant) firstEmptylot() (*lot, error) {
 	return nil, errors.New("parking is full")
 }
 
-func (a *attendant) lotWithleastVehicles() (*lot, error) {
+func lotWithleastVehicles(a *attendant) (*lot, error) {
 	Count := math.MaxInt
 	lotId := -1
 	for i, lot := range a.lots {
@@ -130,6 +127,11 @@ func NewAttendantv2(plan ParkingPlan, lots ...*lot) (*attendant, error) {
 		return nil, err
 	}
 	attendant.plan = plan
+	if plan == Simple {
+		attendant.availablelot = firstEmptylot
+	} else {
+		attendant.availablelot = lotWithleastVehicles
+	}
 	return attendant, nil
 }
 

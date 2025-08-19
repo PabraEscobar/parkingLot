@@ -23,8 +23,8 @@ func TestNewAttendantCannotExistWithNilLot(t *testing.T) {
 func TestAttendantParkVehicle(t *testing.T) {
 	//initalization
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
-	attendant.plan = 1
+	attendant, _ := NewAttendantv2(Simple, lot)
+	// attendant.plan = Simple
 	expectedVehicle := car1
 	var actualVehicle *vehicle
 	var err error
@@ -44,8 +44,7 @@ func TestAttendantParkVehicle(t *testing.T) {
 func TestAttendentUnparkVehicle(t *testing.T) {
 	//initalization
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
-	attendant.plan = 1
+	attendant, _ := NewAttendantv2(Simple, lot)
 	expectedVehicle := car1
 	var actualVehicle *vehicle
 	var err error
@@ -66,8 +65,7 @@ func TestAttendentUnparkVehicle(t *testing.T) {
 func TestAttendantCannotParkWhenParkinFull(t *testing.T) {
 	//initalization
 	lot, _ := Newlot(1)
-	attendant, _ := NewAttendant(lot)
-	attendant.plan = 1
+	attendant, _ := NewAttendantv2(Simple, lot)
 	var actualErr error
 
 	//logic to test
@@ -83,8 +81,7 @@ func TestAttendantCannotParkWhenParkinFull(t *testing.T) {
 
 func TestAttendantCannotParkVehicleWhichIsAlreadyParked(t *testing.T) {
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
-	attendant.plan = 1
+	attendant, _ := NewAttendantv2(Simple, lot)
 
 	attendant.Park(car1)
 	_, actualErr := attendant.Park(car1)
@@ -97,8 +94,7 @@ func TestAttendantCannotParkVehicleWhichIsAlreadyParked(t *testing.T) {
 
 func TestAttendantCannotParkNilVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
-	attendant.plan = 1
+	attendant, _ := NewAttendantv2(Simple, lot)
 	attendant.Park(car1)
 	_, actualErr := attendant.Park(nil)
 	expectedErr := errors.New("nil vehicle cannot be parked")
@@ -110,8 +106,7 @@ func TestAttendantCannotParkNilVehicle(t *testing.T) {
 
 func TestAttendantCannotUnparkNonParkedVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
-	attendant.plan = 1
+	attendant, _ := NewAttendantv2(Simple, lot)
 
 	attendant.Park(car2)
 	_, actualErr := attendant.Unpark(car1)
@@ -123,7 +118,7 @@ func TestAttendantCannotUnparkNonParkedVehicle(t *testing.T) {
 
 func TestAttendantCannotUnparkNilVehicle(t *testing.T) {
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
+	attendant, _ := NewAttendantv2(Simple, lot)
 	_, actualErr := attendant.Unpark(nil)
 
 	expectedErr := errors.New("nil vehicle cannot be unparked")
@@ -134,8 +129,7 @@ func TestAttendantCannotUnparkNilVehicle(t *testing.T) {
 
 func TestAttendantParksInFirstAvailableSlot(t *testing.T) {
 	lot, _ := Newlot(3)
-	attendant, _ := NewAttendant(lot)
-	attendant.plan = 1
+	attendant, _ := NewAttendantv2(Simple, lot)
 	attendant.Park(car1)
 	attendant.Park(car2)
 
@@ -152,8 +146,7 @@ func TestAttendantParksInFirstAvailableSlot(t *testing.T) {
 
 func TestParkingVehicleAfterUnparkWhenParkingFull(t *testing.T) {
 	lot, _ := Newlot(2)
-	attendant, _ := NewAttendant(lot)
-	attendant.plan = 1
+	attendant, _ := NewAttendantv2(Simple, lot)
 
 	attendant.Park(car1)
 	attendant.Park(car2)
@@ -171,7 +164,7 @@ func TestAttendantManageMultipleLot(t *testing.T) {
 	anotherLot, _ := NewlotV2(2, 1)
 
 	//business logic
-	attendant, err := NewAttendant(lot, anotherLot)
+	attendant, err := NewAttendantv2(Simple, lot, anotherLot)
 
 	//assertions
 	if err != nil {
@@ -185,8 +178,7 @@ func TestAttendantManageMultipleLot(t *testing.T) {
 func TestAttendantCanParkCarInNextLot(t *testing.T) {
 	lot, _ := NewlotV2(0, 1)
 	anotherLot, _ := NewlotV2(1, 1)
-	attendant, _ := NewAttendant(lot, anotherLot)
-	attendant.plan = 1
+	attendant, _ := NewAttendantv2(Simple, lot, anotherLot)
 
 	_, err := attendant.Park(car1)
 	if err != nil {
@@ -206,8 +198,7 @@ func TestAttendantCanParkCarInNextLot(t *testing.T) {
 func TestAttendantUnparkVehicleParkedInAnyLot(t *testing.T) {
 	lot, _ := NewlotV2(0, 1)
 	anotherLot, _ := NewlotV2(1, 1)
-	attendant, _ := NewAttendant(lot, anotherLot)
-	attendant.plan = 1
+	attendant, _ := NewAttendantv2(Simple, lot,anotherLot)
 
 	_, err := attendant.Park(car1)
 	if err != nil {
@@ -233,8 +224,7 @@ func TestAttendantUnparkVehicleParkedInAnyLot(t *testing.T) {
 func TestAttendantCanParkSameVehicleAfterUnPark(t *testing.T) {
 	lot, _ := NewlotV2(0, 1)
 	anotherLot, _ := NewlotV2(1, 1)
-	attendant, _ := NewAttendant(lot, anotherLot)
-	attendant.plan = 1
+	attendant, _ := NewAttendantv2(Simple, lot,anotherLot)
 
 	_, err := attendant.Park(car1)
 	if err != nil {
