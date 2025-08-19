@@ -5,7 +5,16 @@ import (
 	"math"
 )
 
-type findAvailableLot func(a *attendant) (*lot, error)
+type parkingLot interface {
+	Park(vehicle *vehicle) (*vehicle, error)
+	Unpark(car *vehicle) (*vehicle, error)
+	isparked(vehicle *vehicle) bool
+	vehicleCount() int
+	AddSubscriberParkingFull(subscriber ParkingFullReceiver)
+	AddSubscriberParkingStatus(subscriber ParkingStatusReceiver)
+}
+
+type findAvailableLot func(a *attendant) (parkingLot, error)
 
 type ParkingPlan int
 
@@ -18,7 +27,7 @@ const (
 type attendant struct {
 	availableLotForPark findAvailableLot
 	approach            ParkingPlan
-	lots                []*lot
+	lots                []parkingLot
 	lotsFullStatus      []bool
 }
 
@@ -76,7 +85,7 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 	return vehicle, nil
 }
 
-func findFirstEmptylot(a *attendant) (*lot, error) {
+func findFirstEmptylot(a *attendant) (parkingLot, error) {
 	for i, lot := range a.lots {
 		if a.lotsFullStatus[i] {
 			continue
@@ -86,7 +95,7 @@ func findFirstEmptylot(a *attendant) (*lot, error) {
 	return nil, errors.New("parking is full")
 }
 
-func findLotWithleastVehicles(a *attendant) (*lot, error) {
+func findLotWithleastVehicles(a *attendant) (parkingLot, error) {
 	Count := math.MaxInt
 	lotId := -1
 	for i, lot := range a.lots {
@@ -105,7 +114,7 @@ func findLotWithleastVehicles(a *attendant) (*lot, error) {
 	return a.lots[lotId], nil
 }
 
-func findLotWithMaximumVehicles(a *attendant) (*lot, error) {
+func findLotWithMaximumVehicles(a *attendant) (parkingLot, error) {
 	Count := -1
 	lotId := -1
 	for i, lot := range a.lots {
@@ -124,13 +133,13 @@ func findLotWithMaximumVehicles(a *attendant) (*lot, error) {
 	return a.lots[lotId], nil
 }
 
-func NewAttendant(lots ...*lot) (*attendant, error) {
+func NewAttendant(lots ...parkingLot) (*attendant, error) {
 	for _, lot := range lots {
 		if lot == nil {
 			return nil, errors.New("attendant does not exist without parking lot")
 		}
 	}
-	l := make([]*lot, 0, len(lots))
+	l := make([]parkingLot, 0, len(lots))
 	parkingFull := make([]bool, len(lots)+1)
 	l = append(l, lots...)
 	a := &attendant{lots: l, lotsFullStatus: parkingFull}
@@ -141,7 +150,7 @@ func NewAttendant(lots ...*lot) (*attendant, error) {
 	return a, nil
 }
 
-func NewAttendantv2(plan ParkingPlan, lots ...*lot) (*attendant, error) {
+func NewAttendantv2(plan ParkingPlan, lots ...parkingLot) (*attendant, error) {
 	attendant, err := NewAttendant(lots...)
 	if err != nil {
 		return nil, err
