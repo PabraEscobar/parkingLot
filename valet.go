@@ -18,6 +18,12 @@ func (a *attendant) ParkingFullReceive(i uint) {
 	a.parkingFull[i] = true
 }
 
+func (a *attendant) Receive(status ParkingStatus, i uint) {
+	if status == ParkingAvailable {
+		a.parkingFull[i] = false
+	}
+}
+
 func (a *attendant) Unpark(vehicle *vehicle) (*vehicle, error) {
 	if vehicle == nil {
 		return nil, errors.New("nil vehicle cannot be unparked")
@@ -34,7 +40,6 @@ func (a *attendant) Unpark(vehicle *vehicle) (*vehicle, error) {
 		if err != nil {
 			return nil, err
 		}
-		a.parkingFull[lot.id] = false
 	}
 	return vehicle, nil
 }
@@ -112,6 +117,7 @@ func NewAttendant(lots ...*lot) (*attendant, error) {
 	a := &attendant{lots: l, parkingFull: parkingFull}
 	for _, lot := range lots {
 		lot.AddSubscriberParkingFull(a)
+		lot.AddSubscriberParkingStatus(a)
 	}
 	return a, nil
 }
