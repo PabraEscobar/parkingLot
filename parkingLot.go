@@ -23,11 +23,11 @@ func (v *vehicle) Equals(vehicleTwo *vehicle) bool {
 }
 
 type lot struct {
-	capacity                uint
-	vehicles                []*vehicle
-	subscribersParkingFull  []ParkingFullReceiver
-	subscriberParkingStatus ParkingStatusReceiver
-	id                      uint
+	capacity                 uint
+	vehicles                 []*vehicle
+	subscribersParkingFull   []ParkingFullReceiver
+	subscribersParkingStatus []ParkingStatusReceiver
+	id                       uint
 }
 
 type ParkingStatus uint
@@ -48,6 +48,10 @@ type ParkingFullReceiver interface {
 
 func (l *lot) AddSubscriberParkingFull(subscriber ParkingFullReceiver) {
 	l.subscribersParkingFull = append(l.subscribersParkingFull, subscriber)
+}
+
+func (l *lot) AddSubscriberParkingStatus(subscriber ParkingStatusReceiver) {
+	l.subscribersParkingStatus = append(l.subscribersParkingStatus, subscriber)
 }
 
 func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
@@ -78,8 +82,8 @@ func (l *lot) notifyParkingAvailable() {
 	if uint(vehicleCount+1) != l.capacity {
 		return
 	}
-	if l.subscriberParkingStatus != nil {
-		l.subscriberParkingStatus.Receive(ParkingAvailable)
+	for _, subscriber := range l.subscribersParkingStatus {
+		subscriber.Receive(ParkingAvailable)
 	}
 }
 
@@ -114,8 +118,8 @@ func (l *lot) notifyParkingFull() {
 	if uint(vehicleCount) != l.capacity {
 		return
 	}
-	if l.subscriberParkingStatus != nil {
-		l.subscriberParkingStatus.Receive(ParkingFull)
+	for _, subscriber := range l.subscribersParkingStatus {
+		subscriber.Receive(ParkingFull)
 	}
 	for _, subscriber := range l.subscribersParkingFull {
 		subscriber.ParkingFullReceive(l.id)

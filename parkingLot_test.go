@@ -168,17 +168,33 @@ func (m *mockOwner) Receive(status ParkingStatus) {
 	m.receivedStatus = status
 }
 
+type mockParkingStatusReceiver struct {
+	receivedStatus ParkingStatus
+}
+
+func (m *mockParkingStatusReceiver) Receive(status ParkingStatus) {
+	m.receivedStatus = status
+}
+
 func TestOnlyNotifiedToOwnerThatParkingAvailableAndFull(t *testing.T) {
 	parking, _ := Newlot(2)
 	owner := &mockOwner{}
-	(parking).subscriberParkingStatus = owner
+	subscriber := &mockParkingStatusReceiver{}
+	parking.AddSubscriberParkingStatus(owner)
+	parking.AddSubscriberParkingStatus(subscriber)
 	parking.Park(car1)
 	parking.Park(car2)
 	if owner.receivedStatus != ParkingFull {
 		t.Errorf("owner is not notified that parking is Full")
 	}
+	if subscriber.receivedStatus != ParkingFull {
+		t.Errorf("owner is not notified that parking is Full")
+	}
 	parking.Unpark(car2)
 	if owner.receivedStatus != ParkingAvailable {
+		t.Errorf("owner is not notified that parking is available")
+	}
+	if subscriber.receivedStatus != ParkingAvailable {
 		t.Errorf("owner is not notified that parking is available")
 	}
 }
@@ -186,7 +202,7 @@ func TestOnlyNotifiedToOwnerThatParkingAvailableAndFull(t *testing.T) {
 func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatus(t *testing.T) {
 	parking, _ := Newlot(2)
 	owner := &mockOwner{}
-	parking.subscriberParkingStatus = owner
+	parking.AddSubscriberParkingStatus(owner)
 	parking.Park(car1)
 	parking.Park(car2)
 	parking.Unpark(car2)
@@ -198,7 +214,7 @@ func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatus(t *t
 func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatusEdgeCase(t *testing.T) {
 	parking, _ := Newlot(2)
 	owner := &mockOwner{}
-	parking.subscriberParkingStatus = owner
+	parking.AddSubscriberParkingStatus(owner)
 
 	parking.Park(car1)
 	parking.Park(car2)
@@ -257,7 +273,7 @@ func TestUnparkNilVehicle(t *testing.T) {
 func TestNotifySubscriberWhenParkingAvailable(t *testing.T) {
 	parking, _ := Newlot(2)
 	owner := &mockOwner{}
-	parking.subscriberParkingStatus = owner
+	parking.AddSubscriberParkingStatus(owner)
 
 	parking.Park(car1)
 	parking.Park(car2)
