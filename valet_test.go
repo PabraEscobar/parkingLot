@@ -83,12 +83,23 @@ func TestAttendantCannotParkWhenParkinFull(t *testing.T) {
 }
 
 func TestAttendantCannotParkVehicleWhichIsAlreadyParked(t *testing.T) {
-	lot, _ := Newlot(2)
-	attendant, _ := NewAttendantv2(ParkInFirstEmptyLot, lot)
+	lot1, _ := NewlotV2(0, 2)
+	lot2, _ := NewlotV2(1, 2)
 
-	attendant.Park(car1)
-	_, actualErr := attendant.Park(car1)
+	attendantWithFirstEmptyLotPlan, _ := NewAttendantv2(ParkInFirstEmptyLot, lot1, lot2)
+	attendantWithLeastFilledLotPlan, _ := NewAttendantv2(ParkInLeastFilledLot, lot1, lot2)
+
+	attendantWithFirstEmptyLotPlan.Park(car1)
+	_, actualErr := attendantWithFirstEmptyLotPlan.Park(car1)
 	expectedErr := errors.New("car already parked in parking lot")
+
+	if actualErr.Error() != expectedErr.Error() {
+		t.Errorf("attendant should not be able to park the same vehicle")
+	}
+
+	attendantWithLeastFilledLotPlan.Park(car2)
+	_, actualErr = attendantWithFirstEmptyLotPlan.Park(car2)
+	expectedErr = errors.New("car already parked in parking lot")
 
 	if actualErr.Error() != expectedErr.Error() {
 		t.Errorf("attendant should not be able to park the same vehicle")
