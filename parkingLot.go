@@ -155,7 +155,7 @@ func (l *lot) isparked(vehicle *vehicle) bool {
 	return false
 }
 
-func (l *lot) vehicleCount() int {
+func (l *lot) parkedVehicleCount() int {
 	count := 0
 	for _, vehicle := range l.vehicles {
 		if vehicle != nil {

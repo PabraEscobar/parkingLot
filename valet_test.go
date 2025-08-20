@@ -504,7 +504,7 @@ func (m *mockParkingLot) isparked(veh *vehicle) bool {
 	return args.Bool(0)
 }
 
-func (m *mockParkingLot) vehicleCount() int {
+func (m *mockParkingLot) parkedVehicleCount() int {
 	args := m.Called()
 	return args.Int(0)
 }
@@ -539,9 +539,9 @@ func TestAttendantHavingLeastFilledLotParkingPlanParkVehicleInLeastFilledLot(t *
 	//assertions
 	mockLot1.On("Park", car1).Return(car1, nil).Once()
 	mockLot2.On("Park", car2).Return(car2, nil).Once()
-	mockLot1.On("vehicleCount").Return(0).Once()
-	mockLot1.On("vehicleCount").Return(1).Once()
-	mockLot2.On("vehicleCount").Return(0)
+	mockLot1.On("parkedVehicleCount").Return(0).Once()
+	mockLot1.On("parkedVehicleCount").Return(1).Once()
+	mockLot2.On("parkedVehicleCount").Return(0)
 
 	//business logic
 	_, err := attendant.Park(car1)
@@ -581,8 +581,8 @@ func TestAttendantHavingMaximumFilledLotParkingPlanParkInMostFilledLot(t *testin
 	//assertions
 	mockLot1.On("Park", car2).Return(car2, nil).Once()
 	mockLot1.On("Park", car1).Return(car1, nil).Once()
-	mockLot1.On("vehicleCount").Return(1).Once()
-	mockLot2.On("vehicleCount").Return(0).Once()
+	mockLot1.On("parkedVehicleCount").Return(1).Once()
+	mockLot2.On("parkedVehicleCount").Return(0).Once()
 
 	//business logic
 	_, err := attendantWithFirstEmptyLotPlan.Park(car2)

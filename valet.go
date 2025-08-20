@@ -9,7 +9,7 @@ type parkingLot interface {
 	Park(vehicle *vehicle) (*vehicle, error)
 	Unpark(car *vehicle) (*vehicle, error)
 	isparked(vehicle *vehicle) bool
-	vehicleCount() int
+	parkedVehicleCount() int
 	AddSubscriberParkingFull(subscriber ParkingFullReceiver)
 	AddSubscriberParkingStatus(subscriber ParkingStatusReceiver)
 }
@@ -102,7 +102,7 @@ func findLotWithleastVehicles(a *attendant) (parkingLot, error) {
 		if a.lotsFullStatus[i] {
 			continue
 		}
-		vehicleCount := lot.vehicleCount()
+		vehicleCount := lot.parkedVehicleCount()
 		if Count > vehicleCount {
 			Count = vehicleCount
 			lotId = i
@@ -121,7 +121,7 @@ func findLotWithMaximumVehicles(a *attendant) (parkingLot, error) {
 		if a.lotsFullStatus[i] {
 			continue
 		}
-		vehicleCount := lot.vehicleCount()
+		vehicleCount := lot.parkedVehicleCount()
 		if Count < vehicleCount {
 			Count = vehicleCount
 			lotId = i
