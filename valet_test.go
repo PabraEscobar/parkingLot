@@ -169,7 +169,7 @@ func TestAttendantManageMultipleLot(t *testing.T) {
 	if err != nil {
 		t.Fatal("attendant should be created with multiple lots")
 	}
-	if len(attendant.(*simpleAttendant).lots) != 2 {
+	if len(attendant.(*fasAttendant).lots) != 2 {
 		t.Fatal("attendant should have 2 lots")
 	}
 }
@@ -258,7 +258,7 @@ func TestBalancedAttendantParkVehicleInLeastFilledLot(t *testing.T) {
 	if err != nil {
 		t.Fatal("attendant should be created with multiple lots")
 	}
-	if len(balancedAttendant.(*complexAttendant).lots) != 2 {
+	if len(balancedAttendant.(*lflAttendant).lots) != 2 {
 		t.Fatal("attendant should have 2 lots")
 	}
 
@@ -289,7 +289,7 @@ func TestBalancedAttendantCannotParkVehicleWhenParkingIsFull(t *testing.T) {
 	if err != nil {
 		t.Fatal("attendant should be created with multiple lots")
 	}
-	if len(balancedAttendant.(*complexAttendant).lots) != 2 {
+	if len(balancedAttendant.(*lflAttendant).lots) != 2 {
 		t.Fatal("attendant should have 2 lots")
 	}
 
@@ -321,7 +321,7 @@ func TestBalancedAttendantParkVehicleInFirstOrderWhenMultipleLotsHaveLeastFilled
 	if err != nil {
 		t.Fatal("attendant should be created with multiple lots")
 	}
-	if len(balancedAttendant.(*complexAttendant).lots) != 3 {
+	if len(balancedAttendant.(*lflAttendant).lots) != 3 {
 		t.Fatal("attendant should have 3 lots")
 	}
 
@@ -351,23 +351,23 @@ func TestBothAttendantParkVehicle(t *testing.T) {
 	thirdLot, _ := NewlotV2(2, 3)
 
 	//business logic
-	fasAttendant, _ := NewAttendant(uint(FirstAvailableSlot), firstLot, secondLot, thirdLot)
+	simpleAttendant, _ := NewAttendant(uint(FirstAvailableSlot), firstLot, secondLot, thirdLot)
 	balancedAttendant, err := NewAttendant(uint(LeastFilledLot), firstLot, secondLot, thirdLot)
 
 	//assertions
 	if err != nil {
 		t.Fatal("attendant should be created with multiple lots")
 	}
-	if len(fasAttendant.(*simpleAttendant).lots) != 3 {
+	if len(simpleAttendant.(*fasAttendant).lots) != 3 {
 		t.Fatal("simple attendant should have 3 lots")
 	}
-	if len(balancedAttendant.(*complexAttendant).lots) != 3 {
+	if len(balancedAttendant.(*lflAttendant).lots) != 3 {
 		t.Fatal("balanced attendant should have 3 lots")
 	}
 
 	//logic to test
-	fasAttendant.Park(car1)
-	fasAttendant.Park(car2)
+	simpleAttendant.Park(car1)
+	balancedAttendant.Park(car2)
 
 	car3, _ := NewVehicle("MH14FG4567")
 
@@ -380,8 +380,8 @@ func TestBothAttendantParkVehicle(t *testing.T) {
 		t.Fatal("car3 should be parked in the second lot as the first order with the least filled slots")
 	}
 
-	if car3.Equals(secondLot.vehicles[0]) == false {
-		t.Fatal("car3 should be parked in the first slot of second lot")
+	if car3.Equals(thirdLot.vehicles[0]) == false {
+		t.Fatal("car3 should be parked in the first slot of third lot")
 	}
 }
 
@@ -430,4 +430,108 @@ func TestTimePass(t *testing.T) {
     if car4.Equals(lot1.vehicles[0])  == false{
         t.Fatalf("car should have been parked in first slot but was parked in lot 2 %v", lot2.vehicles[1])
     }
+}
+
+func TestAttendantWithMFLMethodParkVehicleInMostFilledLot(t *testing.T) {
+	//intialization
+	firstLot, _ := NewlotV2(0, 3)
+	secondLot, _ := NewlotV2(1, 3)
+
+	//business logic
+	mostFilledLotParkAttendant, err := NewAttendant(uint(MostFilledLot), firstLot, secondLot)
+
+	//assertions
+	if err != nil {
+		t.Fatal("attendant should be created with multiple lots")
+	}
+	if len(mostFilledLotParkAttendant.(*mflAttendant).lots) != 2 {
+		t.Fatal("attendant should have 2 lots")
+	}
+
+	//logic to test
+	mostFilledLotParkAttendant.Park(car1)
+	_, actualErr := mostFilledLotParkAttendant.Park(car2)
+
+	if actualErr != nil {
+		t.Fatal("car2 should be parked")
+	}
+	if firstLot.vehicles[0] == nil {
+		t.Fatal("balanced attendant should park in the second lot")
+	}
+	if car2.Equals(firstLot.vehicles[1]) == false {
+		t.Fatal("balanced attendant should park in the first slot of second lot")
+	}
+}
+
+func TestAttendantWithMFLMethodCannotParkVehicleWhenParkingIsFull(t *testing.T) {
+	//intialization
+	lot, _ := NewlotV2(0, 1)
+	anotherLot, _ := NewlotV2(1, 1)
+
+	//business logic
+	mostFilledLotParkAttendant, err := NewAttendant(uint(MostFilledLot), lot, anotherLot)
+
+	//assertions
+	if err != nil {
+		t.Fatal("attendant should be created with multiple lots")
+	}
+	if len(mostFilledLotParkAttendant.(*mflAttendant).lots) != 2 {
+		t.Fatal("attendant should have 2 lots")
+	}
+
+	//logic to test
+	mostFilledLotParkAttendant.Park(car1)
+	mostFilledLotParkAttendant.Park(car2)
+
+	car3, _ := NewVehicle("MH14FG4567")
+
+	expectedErr := errors.New("parking is full")
+	_, actualErr := mostFilledLotParkAttendant.Park(car3)
+
+	if actualErr == expectedErr {
+		t.Fatal("car3 cannot be parked when parking lot is full")
+	}
+}
+
+func TestAttendantWithMFLMethodParkVehicleInFirstOrderWhenMultipleLotsHaveMostFilled(t *testing.T) {
+	//intialization
+	firstLot, _ := NewlotV2(0, 3)
+	secondLot, _ := NewlotV2(1, 3)
+	thirdLot, _ := NewlotV2(2, 3)
+
+	//business logic
+	balancedAttendant, err1 := NewAttendant(uint(LeastFilledLot), firstLot, secondLot, thirdLot)
+	mostFilledLotParkAttendant, err2 := NewAttendant(uint(MostFilledLot), firstLot, secondLot, thirdLot)
+
+	//assertions
+	if err1 != nil {
+		t.Fatal("balanced attendant should be created with multiple lots")
+	}
+	if err2 != nil {
+		t.Fatal("attendant park with most filled lot plan should be created with multiple lots")
+	}
+	if len(balancedAttendant.(*lflAttendant).lots) != 3 {
+		t.Fatal("attendant should have 3 lots")
+	}
+	if len(mostFilledLotParkAttendant.(*mflAttendant).lots) != 3 {
+		t.Fatal("attendant should have 3 lots")
+	}
+
+	//logic to test
+	balancedAttendant.Park(car1)
+	balancedAttendant.Park(car2)
+
+	car3, _ := NewVehicle("MH14FG4567")
+
+	_, actualErr := mostFilledLotParkAttendant.Park(car3)
+
+	if actualErr != nil {
+		t.Fatal("car3 cannot be parked when parking lot is full")
+	}
+	if firstLot.vehicles[1] == nil {
+		t.Fatal("car3 should be parked in the first lot as the first order with the most filled slots")
+	}
+	if car3.Equals(firstLot.vehicles[1]) == false {
+		t.Fatal("car3 should be parked in the second slot of first lot")
+	}
 }
