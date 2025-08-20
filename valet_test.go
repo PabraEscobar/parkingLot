@@ -42,6 +42,9 @@ func TestAttendantParkVehicle(t *testing.T) {
 	if !expectedVehicle.Equals(actualVehicle) {
 		t.Errorf("vehicle number should be match with provided number")
 	}
+	if car1.Equals(lot.vehicles[0]) == false {
+		t.Fatal("car1 should be parked in first slot of lot")
+	}
 }
 
 func TestAttendentUnparkVehicle(t *testing.T) {
@@ -63,9 +66,12 @@ func TestAttendentUnparkVehicle(t *testing.T) {
 	if !expectedVehicle.Equals(actualVehicle) {
 		t.Errorf("vehicle number should be match with provided number")
 	}
+	if lot.vehicles[0] != nil {
+		t.Fatal("car1 should be unparked from the lot")
+	}
 }
 
-func TestAttendantCannotParkWhenParkinFull(t *testing.T) {
+func TestAttendantCannotParkWhenParkingFull(t *testing.T) {
 	//initalization
 	lot, _ := Newlot(1)
 	attendant, _ := NewAttendantv2(ParkInFirstEmptyLot, lot)
