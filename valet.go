@@ -12,6 +12,7 @@ type ParkingPlan int
 const (
 	ParkInFirstEmptyLot ParkingPlan = iota
 	ParkInLeastFilledLot
+	ParkInMaximumFilledLot
 )
 
 type attendant struct {
@@ -104,6 +105,25 @@ func findLotWithleastVehicles(a *attendant) (*lot, error) {
 	return a.lots[lotId], nil
 }
 
+func findLotWithMaximumVehicles(a *attendant) (*lot, error) {
+	Count := -1
+	lotId := -1
+	for i, lot := range a.lots {
+		if a.lotsFullStatus[i] {
+			continue
+		}
+		vehicleCount := lot.vehicleCount()
+		if Count < vehicleCount {
+			Count = vehicleCount
+			lotId = i
+		}
+	}
+	if lotId == -1 {
+		return nil, errors.New("parking is full")
+	}
+	return a.lots[lotId], nil
+}
+
 func NewAttendant(lots ...*lot) (*attendant, error) {
 	for _, lot := range lots {
 		if lot == nil {
@@ -129,8 +149,10 @@ func NewAttendantv2(plan ParkingPlan, lots ...*lot) (*attendant, error) {
 	attendant.approach = plan
 	if plan == ParkInFirstEmptyLot {
 		attendant.availableLotForPark = findFirstEmptylot
-	} else {
+	} else if plan == ParkInLeastFilledLot {
 		attendant.availableLotForPark = findLotWithleastVehicles
+	} else {
+		attendant.availableLotForPark = findLotWithMaximumVehicles
 	}
 	return attendant, nil
 }

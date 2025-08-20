@@ -358,3 +358,125 @@ func TestBothAttendantShouldBeAbleToParkAndUnpark(t *testing.T) {
 		t.Fatalf("car should have been parked in first slot but was parked in lot 2 %v", lot2.vehicles[1])
 	}
 }
+
+func TestParkUsingAttendantWithMaximumFilledLotParkingPlan(t *testing.T) {
+	lot1, _ := NewlotV2(0, 2)
+	lot2, _ := NewlotV2(1, 2)
+
+	attendantWithMaxFilledLotPlan, _ := NewAttendantv2(ParkInMaximumFilledLot, lot1, lot2)
+
+	_, err := attendantWithMaxFilledLotPlan.Park(car1)
+	if err != nil {
+		t.Fatalf("park setup failed for car1 %v", err)
+	}
+
+	_, err = attendantWithMaxFilledLotPlan.Park(car2)
+	if err != nil {
+		t.Fatalf("park stup failed for car2 %v", err)
+	}
+
+	if car2.Equals(lot1.vehicles[1]) == false {
+		t.Fatal("attendant should park in lot2")
+	}
+}
+
+func TestAttendantWithMaximumFilledLotPlanCannotParkVehicleWhenParkingFull(t *testing.T) {
+	lot1, _ := NewlotV2(0, 2)
+	lot2, _ := NewlotV2(1, 1)
+
+	attendantWithMaxFilledLotPlan, _ := NewAttendantv2(ParkInMaximumFilledLot, lot1, lot2)
+	car3 := &vehicle{number: "Rj19"}
+	car4 := &vehicle{number: "Rj18"}
+
+	_, err := attendantWithMaxFilledLotPlan.Park(car1)
+	if err != nil {
+		t.Fatalf("park setup failed for car1 %v", err)
+	}
+	_, err = attendantWithMaxFilledLotPlan.Park(car2)
+	if err != nil {
+		t.Fatalf("park stup failed for car2 %v", err)
+	}
+
+	_, err = attendantWithMaxFilledLotPlan.Park(car3)
+	if err != nil {
+		t.Fatalf("park setup failed for car3 %v", err)
+	}
+	_, err = attendantWithMaxFilledLotPlan.Park(car4)
+	if err == nil {
+		t.Fatal("car4 cannot be parked parking lot is full")
+	}
+}
+
+func TestAllTheAttendantsAbleToParkAndUnpark(t *testing.T) {
+	lot1, _ := NewlotV2(0, 2)
+	lot2, _ := NewlotV2(1, 2)
+
+	car3 := &vehicle{number: "car3"}
+	car4 := &vehicle{number: "car4"}
+	car5 := &vehicle{number: "car5"}
+	car6 := &vehicle{number: "car6"}
+
+	attendantWithFirstEmptyLotPlan, _ := NewAttendantv2(ParkInFirstEmptyLot, lot1, lot2)
+	attendantWithLeastFilledLotPlan, _ := NewAttendantv2(ParkInLeastFilledLot, lot1, lot2)
+	attendantWithMaximumFilledLotPlan, _ := NewAttendantv2(ParkInMaximumFilledLot, lot1, lot2)
+
+	_, err := attendantWithFirstEmptyLotPlan.Park(car1)
+	if err != nil {
+		t.Fatalf("park setup failed for car1 by attendantWithFirstEmptyLotPlan %v", err)
+	}
+
+	_, err = attendantWithFirstEmptyLotPlan.Park(car2)
+	if err != nil {
+		t.Fatalf("park stup failed for car2 by attendantWithFirstEmptyLotPlan %v", err)
+	}
+
+	if car1.Equals(lot1.vehicles[0]) == false {
+		t.Fatal("attendant should park car1 in lot1")
+	}
+
+	if car2.Equals(lot1.vehicles[1]) == false {
+		t.Fatal("attendant should park car2 in lot1")
+	}
+
+	_, err = attendantWithLeastFilledLotPlan.Park(car3)
+	if err != nil {
+		t.Fatalf("Park setup failed for car3 by attendantWithLeastFilledLotPlan %v", err)
+	}
+
+	_, err = attendantWithFirstEmptyLotPlan.Unpark(car1)
+	if err != nil {
+		t.Fatalf("unpark setup failed for car1 by attendantWithFirstEmptyLotPlan %v", err)
+	}
+
+	_, err = attendantWithMaximumFilledLotPlan.Unpark(car2)
+	if err != nil {
+		t.Fatalf("unpark setup failed for car2 by attendantWithLeastFilledLotPlan %v", err)
+	}
+
+	_, err = attendantWithMaximumFilledLotPlan.Park(car5)
+	if err != nil {
+		t.Fatalf("park setup failed for car1 by attendantWithMaximumFilledLotPlan %v", err)
+	}
+
+	if car5.Equals(lot2.vehicles[1]) == false {
+		t.Fatal("car1 should parked in lot2 by attendantWithMaximumFilledLotPlan")
+	}
+
+	_, err = attendantWithMaximumFilledLotPlan.Park(car6)
+	if err != nil {
+		t.Fatalf("park setup failed for car2 by attendantWithLeastFilledLotPlan %v", err)
+	}
+
+	if car6.Equals(lot1.vehicles[0]) == false {
+		t.Fatal("car1 should parked in lot1 by attendantWithMaximumFilledLotPlan")
+	}
+
+	_, err = attendantWithLeastFilledLotPlan.Park(car4)
+	if err != nil {
+		t.Fatalf("Park setup failed for car4 by attendantWithLeastFilledLotPlan %v", err)
+	}
+
+	if car4.Equals(lot1.vehicles[1]) == false {
+		t.Fatalf("car4 should have been parked in lot1 by attendantWithLeastFilledLotPlan %v", lot2.vehicles[1])
+	}
+}
