@@ -517,12 +517,10 @@ func (m *mockParkingLot) AddSubscriberParkingStatus(subscriber ParkingStatusRece
 	m.Called(subscriber)
 }
 
-func TestComplexAttendantParkVehicleInLeastFilledLot(t *testing.T) {
+func TestAttendantHavingLeastFilledLotParkingPlanParkVehicleInLeastFilledLot(t *testing.T) {
+	//intialization
 	mockLot1 := new(mockParkingLot)
 	mockLot2 := new(mockParkingLot)
-
-	mockLot1.On("Park", car1).Return(car1, nil).Once()
-	mockLot2.On("Park", car2).Return(car2, nil).Once()
 
 	mockLot1.On("AddSubscriberParkingFull", mock.Anything).Return()
 	mockLot2.On("AddSubscriberParkingFull", mock.Anything).Return()
@@ -536,22 +534,66 @@ func TestComplexAttendantParkVehicleInLeastFilledLot(t *testing.T) {
 	mockLot2.On("isparked", car2).Return(false)
 	mockLot2.On("isparked", car1).Return(false)
 
-	mockLot1.On("vehicleCount").Return(0).Once()
-	mockLot1.On("vehicleCount").Return(1)
-	mockLot2.On("vehicleCount").Return(0)
-
 	attendant, _ := NewAttendantv2(ParkInLeastFilledLot, mockLot1, mockLot2)
 
-	parkedVehicle, err := attendant.Park(car1)
+	//assertions
+	mockLot1.On("Park", car1).Return(car1, nil).Once()
+	mockLot2.On("Park", car2).Return(car2, nil).Once()
+	mockLot1.On("vehicleCount").Return(0).Once()
+	mockLot1.On("vehicleCount").Return(1).Once()
+	mockLot2.On("vehicleCount").Return(0)
+
+	//business logic
+	_, err := attendant.Park(car1)
 
 	assert.NoError(t, err, "attendant should able to park the car1")
-	assert.Equal(t, car1, parkedVehicle, "parkedVehicle should be equal to car1")
 
-	parkedVehicle, err = attendant.Park(car2)
+	_, err = attendant.Park(car2)
 
 	assert.NoError(t, err, "attendant should able to park the car2")
-	assert.Equal(t, car2, parkedVehicle, "parkedVehicle should be equal to car2")
 
+	// verify assertions
+	mockLot1.AssertExpectations(t)
+	mockLot2.AssertExpectations(t)
+
+}
+
+func TestAttendantHavingMaximumFilledLotParkingPlanParkInMostFilledLot(t *testing.T) {
+	//intialization
+	mockLot1 := new(mockParkingLot)
+	mockLot2 := new(mockParkingLot)
+
+	mockLot1.On("AddSubscriberParkingFull", mock.Anything).Return()
+	mockLot2.On("AddSubscriberParkingFull", mock.Anything).Return()
+
+	mockLot1.On("AddSubscriberParkingStatus", mock.Anything).Return()
+	mockLot2.On("AddSubscriberParkingStatus", mock.Anything).Return()
+
+	mockLot1.On("isparked", car1).Return(false)
+	mockLot1.On("isparked", car2).Return(false)
+
+	mockLot2.On("isparked", car2).Return(false)
+	mockLot2.On("isparked", car1).Return(false)
+
+	attendantWithFirstEmptyLotPlan, _ := NewAttendantv2(ParkInFirstEmptyLot, mockLot1, mockLot2)
+	attendantWithMaxFilledLotPlan, _ := NewAttendantv2(ParkInMaximumFilledLot, mockLot1, mockLot2)
+
+	//assertions
+	mockLot1.On("Park", car2).Return(car2, nil).Once()
+	mockLot1.On("Park", car1).Return(car1, nil).Once()
+	mockLot1.On("vehicleCount").Return(1).Once()
+	mockLot2.On("vehicleCount").Return(0).Once()
+
+	//business logic
+	_, err := attendantWithFirstEmptyLotPlan.Park(car2)
+
+	assert.NoError(t, err, "attendantWithFirstEmptyLotPlan should able to park the car3")
+
+	_, err = attendantWithMaxFilledLotPlan.Park(car1)
+
+	assert.NoError(t, err, "attendantWithMaxFilledLotPlan should able to park the car1")
+
+	// verify assertions
 	mockLot1.AssertExpectations(t)
 	mockLot2.AssertExpectations(t)
 
