@@ -3,6 +3,9 @@ package parking
 import (
 	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestNewAttendant(t *testing.T) {
@@ -479,4 +482,77 @@ func TestAllTheAttendantsAbleToParkAndUnpark(t *testing.T) {
 	if car4.Equals(lot1.vehicles[1]) == false {
 		t.Fatalf("car4 should have been parked in lot1 by attendantWithLeastFilledLotPlan %v", lot2.vehicles[1])
 	}
+
+}
+
+type mockParkingLot struct {
+	mock.Mock
+}
+
+func (m *mockParkingLot) Park(veh *vehicle) (*vehicle, error) {
+	args := m.Called(veh)
+	return args.Get(0).(*vehicle), args.Error(1)
+}
+
+func (m *mockParkingLot) Unpark(veh *vehicle) (*vehicle, error) {
+	args := m.Called(veh)
+	return args.Get(0).(*vehicle), args.Error(1)
+}
+
+func (m *mockParkingLot) isparked(veh *vehicle) bool {
+	args := m.Called(veh)
+	return args.Bool(0)
+}
+
+func (m *mockParkingLot) vehicleCount() int {
+	args := m.Called()
+	return args.Int(0)
+}
+
+func (m *mockParkingLot) AddSubscriberParkingFull(subscriber ParkingFullReceiver) {
+	m.Called(subscriber)
+}
+
+func (m *mockParkingLot) AddSubscriberParkingStatus(subscriber ParkingStatusReceiver) {
+	m.Called(subscriber)
+}
+
+func TestComplexAttendantParkVehicleInLeastFilledLot(t *testing.T) {
+	mockLot1 := new(mockParkingLot)
+	mockLot2 := new(mockParkingLot)
+
+	mockLot1.On("Park", car1).Return(car1, nil).Once()
+	mockLot2.On("Park", car2).Return(car2, nil).Once()
+
+	mockLot1.On("AddSubscriberParkingFull", mock.Anything).Return()
+	mockLot2.On("AddSubscriberParkingFull", mock.Anything).Return()
+
+	mockLot1.On("AddSubscriberParkingStatus", mock.Anything).Return()
+	mockLot2.On("AddSubscriberParkingStatus", mock.Anything).Return()
+
+	mockLot1.On("isparked", car1).Return(false)
+	mockLot1.On("isparked", car2).Return(false)
+
+	mockLot2.On("isparked", car2).Return(false)
+	mockLot2.On("isparked", car1).Return(false)
+
+	mockLot1.On("vehicleCount").Return(0).Once()
+	mockLot1.On("vehicleCount").Return(1)
+	mockLot2.On("vehicleCount").Return(0)
+
+	attendant, _ := NewAttendantv2(ParkInLeastFilledLot, mockLot1, mockLot2)
+
+	parkedVehicle, err := attendant.Park(car1)
+
+	assert.NoError(t, err, "attendant should able to park the car1")
+	assert.Equal(t, car1, parkedVehicle, "parkedVehicle should be equal to car1")
+
+	parkedVehicle, err = attendant.Park(car2)
+
+	assert.NoError(t, err, "attendant should able to park the car2")
+	assert.Equal(t, car2, parkedVehicle, "parkedVehicle should be equal to car2")
+
+	mockLot1.AssertExpectations(t)
+	mockLot2.AssertExpectations(t)
+
 }
