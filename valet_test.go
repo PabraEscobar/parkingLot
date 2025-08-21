@@ -149,18 +149,21 @@ func TestAttendantCannotUnparkNilVehicle(t *testing.T) {
 
 func TestAttendantParksInFirstAvailableSlot(t *testing.T) {
 	lot, _ := Newlot(3)
-	attendant, _ := NewAttendantv2(ParkInFirstEmptyLot, lot)
-	attendant.Park(car1)
-	attendant.Park(car2)
+	attendantWithFirstEmptyLotPlan, _ := NewAttendantv2(ParkInFirstEmptyLot, lot)
+	attendantWithFirstEmptyLotPlan.Park(car1)
+	attendantWithFirstEmptyLotPlan.Park(car2)
 
-	_, err2 := attendant.Unpark(car1)
+	_, err2 := attendantWithFirstEmptyLotPlan.Unpark(car1)
 	if err2 != nil {
 		t.Error(err2)
 	}
-	actualVehicle, err1 := attendant.Park(car1)
+	actualVehicle, err1 := attendantWithFirstEmptyLotPlan.Park(car1)
 	expectedVehicle := car1
 	if !expectedVehicle.Equals(actualVehicle) {
 		t.Errorf("vehicle should be parked in the first available slot %v", err1)
+	}
+	if car1.Equals(lot.vehicles[0]) == false {
+		t.Fatal("car1 should be parked in first available slot")
 	}
 }
 
