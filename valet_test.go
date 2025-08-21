@@ -23,6 +23,14 @@ func TestNewAttendantCannotExistWithNilLot(t *testing.T) {
 	}
 }
 
+func TestNewAttendantHaveDefaultFindAvailableLotFn(t *testing.T) {
+	lot, _ := NewlotV2(0, 1)
+	attendant, _ := NewAttendant(lot)
+	if attendant.findAvailableLotFn == nil {
+		t.Fatal("attendant should have default findAvailableLotFn")
+	}
+}
+
 func TestAttendantParkVehicle(t *testing.T) {
 	//initalization
 	lot, _ := Newlot(2)

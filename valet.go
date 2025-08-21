@@ -149,6 +149,7 @@ func NewAttendant(lots ...parkingLot) (*attendant, error) {
 	parkingFull := make([]bool, len(lots)+1)
 	l = append(l, lots...)
 	a := &attendant{lots: l, lotsFullStatus: parkingFull}
+	a.findAvailableLotFn = findFirstEmptylot
 	for _, lot := range lots {
 		lot.AddSubscriberParkingFull(a)
 		lot.AddSubscriberParkingStatus(a)
