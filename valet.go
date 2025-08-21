@@ -24,6 +24,12 @@ const (
 	ParkInMaximumFilledLot
 )
 
+var parkingPlanMap = map[ParkingPlan]findAvailableLot{
+	ParkInFirstEmptyLot:    findFirstEmptylot,
+	ParkInLeastFilledLot:   findLotWithleastVehicles,
+	ParkInMaximumFilledLot: findLotWithMaximumVehicles,
+}
+
 type attendant struct {
 	availableLotForPark findAvailableLot
 	approach            ParkingPlan
@@ -155,16 +161,14 @@ func NewAttendantv2(plan ParkingPlan, lots ...parkingLot) (*attendant, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	attendant.approach = plan
-	if plan == ParkInFirstEmptyLot {
-		attendant.availableLotForPark = findFirstEmptylot
-	} else if plan == ParkInLeastFilledLot {
-		attendant.availableLotForPark = findLotWithleastVehicles
-	} else if plan == ParkInMaximumFilledLot {
-		attendant.availableLotForPark = findLotWithMaximumVehicles
-	} else {
+	findAvailableLot, ok := parkingPlanMap[plan]
+	if !ok {
 		return nil, errors.New("invalid parking plan")
 	}
+	attendant.availableLotForPark = findAvailableLot
+
 	return attendant, nil
 }
 
