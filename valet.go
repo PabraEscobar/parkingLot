@@ -160,8 +160,10 @@ func NewAttendantv2(plan ParkingPlan, lots ...parkingLot) (*attendant, error) {
 		attendant.availableLotForPark = findFirstEmptylot
 	} else if plan == ParkInLeastFilledLot {
 		attendant.availableLotForPark = findLotWithleastVehicles
-	} else {
+	} else if plan == ParkInMaximumFilledLot {
 		attendant.availableLotForPark = findLotWithMaximumVehicles
+	} else {
+		return nil, errors.New("invalid parking plan")
 	}
 	return attendant, nil
 }

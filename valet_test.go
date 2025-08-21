@@ -277,6 +277,13 @@ func TestNewAttendantv2(t *testing.T) {
 		t.Fatal("NewAttendant should be created")
 	}
 }
+func TestAttendantShouldNotBecreatedWithInvalidParkingPlan(t *testing.T) {
+	lot, _ := NewlotV2(0, 1)
+	_, err := NewAttendantv2(100, lot)
+	if err == nil {
+		t.Fatal("attendant should not  be created")
+	}
+}
 
 func TestNewAttendantv2ShouldNotCreateAttendantWithNilLot(t *testing.T) {
 	lot, _ := NewlotV2(0, 1)
