@@ -31,10 +31,10 @@ var parkingPlanMap = map[ParkingPlan]findAvailableLot{
 }
 
 type attendant struct {
-	availableLotForPark findAvailableLot
-	approach            ParkingPlan
-	lots                []parkingLot
-	lotsFullStatus      []bool
+	findAvailableLotFn findAvailableLot
+	approach           ParkingPlan
+	lots               []parkingLot
+	lotsFullStatus     []bool
 }
 
 // attendant implements ParkingFullReceiver
@@ -76,7 +76,7 @@ func (a *attendant) Park(vehicle *vehicle) (*vehicle, error) {
 		return nil, errors.New("car already parked in parking lot")
 	}
 
-	availablelot := a.availableLotForPark
+	availablelot := a.findAvailableLotFn
 	lot, err := availablelot(a)
 
 	if err != nil {
@@ -163,11 +163,11 @@ func NewAttendantv2(plan ParkingPlan, lots ...parkingLot) (*attendant, error) {
 	}
 
 	attendant.approach = plan
-	findAvailableLot, ok := parkingPlanMap[plan]
+	findAvailableLotFn, ok := parkingPlanMap[plan]
 	if !ok {
 		return nil, errors.New("invalid parking plan")
 	}
-	attendant.availableLotForPark = findAvailableLot
+	attendant.findAvailableLotFn = findAvailableLotFn
 
 	return attendant, nil
 }
