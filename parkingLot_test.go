@@ -1,6 +1,7 @@
 package parking
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -18,30 +19,48 @@ func TestLotShouldNotCreatedWithCapacityZero(t *testing.T) {
 	}
 }
 
+var (
+	car1, _ = NewVehicle("TN39AD1232")
+	car2, _ = NewVehicle("RJ78DE1234")
+)
+
 func TestCanMyCarBeParked(t *testing.T) {
 	parking, _ := Newlot(5)
-	vehicle, err := parking.Park("KA03T4567")
+	actualVehicle, err := parking.Park(car1)
 	if err != nil {
-		t.Errorf("Vehicle should be parked")
+		t.Errorf("Vehicle should be parked %v", err)
 	}
-	if (*vehicle).lotId == uint(0) {
-		t.Errorf("slot id cannot be zero")
+	expectedVehicle := car1
+	if !expectedVehicle.Equals(actualVehicle) {
+		t.Errorf("actual vehicle should be same as expected vehicle")
 	}
 }
 
-func TestVehicleNumberCannotbeEmpty(t *testing.T) {
+func TestNilVehicleShouldNotBeParked(t *testing.T) {
 	parking, _ := Newlot(5)
-	_, err := parking.Park("")
+	_, err := parking.Park(nil)
 	if err == nil {
 		t.Error("vehicle number cannot be empty")
 	}
 }
 
+func TestVehicleSholdNotBeParkedWhenParkingLotFull(t *testing.T) {
+	parking, _ := Newlot(1)
+	_, err := parking.Park(car1)
+	if err != nil {
+		t.Fatalf("test setup failed %v", err)
+	}
+	_, actualErr := parking.Park(car2)
+	expectedErr := errors.New("parking lot is full")
+	if actualErr.Error() != expectedErr.Error() {
+		t.Fatalf("actualErr should be equal to expectedErr")
+	}
+}
+
 func TestUnparkVehicle(t *testing.T) {
 	parking, _ := Newlot(5)
-	vehicle := "KA03T4567"
-	parking.Park(vehicle)
-	vehicleUnparked, err := parking.Unpark(vehicle)
+	parking.Park(car1)
+	vehicleUnparked, err := parking.Unpark(car1)
 	if err != nil {
 		t.Errorf("vehicle should be unparked")
 	}
@@ -52,8 +71,7 @@ func TestUnparkVehicle(t *testing.T) {
 
 func TestUnparkVehicleWhichIsNotParked(t *testing.T) {
 	parking, _ := Newlot(5)
-	vehicle := "KA03T4567"
-	_, err := parking.Unpark(vehicle)
+	_, err := parking.Unpark(car1)
 	if err == nil {
 		t.Errorf("vehichle is not parked with these number")
 	}
@@ -61,35 +79,53 @@ func TestUnparkVehicleWhichIsNotParked(t *testing.T) {
 
 func TestCarAlreadyParked(t *testing.T) {
 	l, _ := Newlot(5)
-	l.Park("RJ19MS1858")
-	_, err := l.Park("RJ19MS1858")
-	if err == nil {
+
+	l.Park(car1)
+	_, actualErr := l.Park(car1)
+	expectedErr := errors.New("car already parked in parking lot")
+	if actualErr.Error() != expectedErr.Error() {
 		t.Errorf("Car already parked can't be parked again")
+	}
+}
+func TestCarParkingAlreadyParkedInAnySlot(t *testing.T) {
+	l, _ := Newlot(5)
+
+	_, err := l.Park(car1)
+	if err != nil {
+		t.Fatalf("should be able to park car1 %v", err)
+	}
+	_, err = l.Park(car2)
+	if err != nil {
+		t.Fatalf("should be able to park car2 %v", err)
+	}
+
+	_, err = l.Unpark(car1)
+	if err != nil {
+		t.Fatalf("should be able to unpark car1 %v", err)
+	}
+
+	_, err = l.Park(car2)
+	if err == nil {
+		t.Fatalf("should give error car already parked")
 	}
 }
 
 type mockParkingFull struct {
-	receivedStatus parkingStatus
+	id             uint
+	receivedStatus ParkingStatus
 }
 
-func (m *mockParkingFull) ReceiveParkingFull() {
-	m.receivedStatus = parkingFull
+func (m *mockParkingFull) ParkingFullReceive(i uint) {
+	m.receivedStatus = ParkingFull
+	m.id = i
 }
 
-type mockParkingAvailable struct {
-	receivedStatus parkingStatus
-}
-
-func (m *mockParkingAvailable) ReceiveParkingAvailable() {
-	m.receivedStatus = parkingAvailable
-}
 func TestNotifiedSubscriberThatParkingFullOfCapacityOne(t *testing.T) {
 	parking, _ := Newlot(1)
 	mockSubscriber := &mockParkingFull{}
-	(parking).SubscribeParkingFullStatus(mockSubscriber)
-	vehicle := "TN39AD1232"
-	parking.Park(vehicle)
-	if mockSubscriber.receivedStatus != parkingFull {
+	(parking).AddSubscriberParkingFull(mockSubscriber)
+	parking.Park(car1)
+	if mockSubscriber.receivedStatus != ParkingFull {
 		t.Errorf("When parking lot is full, parking lot should notify the owner that parking lot is full")
 	}
 }
@@ -97,28 +133,11 @@ func TestNotifiedSubscriberThatParkingFullOfCapacityOne(t *testing.T) {
 func TestNotifiedSubscriberThatPakingFull(t *testing.T) {
 	parking, _ := Newlot(2)
 	mockSubscriber := &mockParkingFull{}
-	(parking).SubscribeParkingFullStatus(mockSubscriber)
-	vehicle := "TN39AD1232"
-	anotherVehicle := "RJ78DE1234"
-	parking.Park(vehicle)
-	parking.Park(anotherVehicle)
+	(parking).AddSubscriberParkingFull(mockSubscriber)
+	parking.Park(car1)
+	parking.Park(car2)
 
-	if mockSubscriber.receivedStatus != parkingFull {
-		t.Errorf("owner is not notified")
-	}
-}
-
-func TestNotifiedSubscriberThatParkingAvailable(t *testing.T) {
-	parking, _ := Newlot(2)
-	mockSubscriber := &mockParkingAvailable{}
-	(parking).SubscribeParkingAvailableStatus(mockSubscriber)
-	vehicle := "TN39AD1232"
-	anotherVehicle := "RJ78DE1234"
-	parking.Park(vehicle)
-	parking.Park(anotherVehicle)
-	parking.Unpark(anotherVehicle)
-
-	if mockSubscriber.receivedStatus != parkingAvailable {
+	if mockSubscriber.receivedStatus != ParkingFull {
 		t.Errorf("owner is not notified")
 	}
 }
@@ -126,55 +145,184 @@ func TestNotifiedSubscriberThatParkingAvailable(t *testing.T) {
 func TestNotifiedSubscribersThatParkingFull(t *testing.T) {
 	parking, _ := Newlot(2)
 	subscriber1 := &mockParkingFull{}
-	(parking).SubscribeParkingFullStatus(subscriber1)
+	(parking).AddSubscriberParkingFull(subscriber1)
 	subscriber2 := &mockParkingFull{}
-	(parking).SubscribeParkingFullStatus(subscriber2)
-	vehicle := "TN39AD1232"
-	anotherVehicle := "RJ78DE1234"
-	parking.Park(vehicle)
-	parking.Park(anotherVehicle)
+	(parking).AddSubscriberParkingFull(subscriber2)
+	parking.Park(car1)
+	parking.Park(car2)
 
-	if subscriber1.receivedStatus != parkingFull {
+	if subscriber1.receivedStatus != ParkingFull {
 		t.Errorf("subscriber1 is not notified that parking is full")
 	}
-	if subscriber2.receivedStatus != parkingFull {
+	if subscriber2.receivedStatus != ParkingFull {
 		t.Errorf("subscriber2 is not notified that parking is full")
 	}
 }
 
-type parkingStatus uint
-
-const (
-	unknown parkingStatus = iota
-	parkingAvailable
-	parkingFull
-)
-
 type mockOwner struct {
-	receivedStatus parkingStatus
+	receivedStatus ParkingStatus
 }
 
-func (m *mockOwner) ReceiveParkingAvailable() {
-	m.receivedStatus = parkingAvailable
-}
-func (m *mockOwner) ReceiveParkingFull() {
-	m.receivedStatus = parkingFull
+func (m *mockOwner) Receive(status ParkingStatus) {
+	m.receivedStatus = status
 }
 
-func TestOnlyNotifiedToOwnerThatParkingAvailable(t *testing.T) {
+func TestOnlyNotifiedToOwnerThatParkingAvailableAndFull(t *testing.T) {
 	parking, _ := Newlot(2)
 	owner := &mockOwner{}
-	(parking).SubscribeParkingAvailableStatus(owner)
-	(parking).SubscribeParkingFullStatus(owner)
-	vehicle := "TN39AD1232"
-	anotherVehicle := "RJ78DE1234"
-	parking.Park(vehicle)
-	parking.Park(anotherVehicle)
-	if owner.receivedStatus != parkingFull {
+	(parking).subscriberParkingStatus = owner
+	parking.Park(car1)
+	parking.Park(car2)
+	if owner.receivedStatus != ParkingFull {
 		t.Errorf("owner is not notified that parking is Full")
 	}
-	parking.Unpark(anotherVehicle)
-	if owner.receivedStatus != parkingAvailable {
+	parking.Unpark(car2)
+	if owner.receivedStatus != ParkingAvailable {
 		t.Errorf("owner is not notified that parking is available")
 	}
+}
+
+func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatus(t *testing.T) {
+	parking, _ := Newlot(2)
+	owner := &mockOwner{}
+	parking.subscriberParkingStatus = owner
+	parking.Park(car1)
+	parking.Park(car2)
+	parking.Unpark(car2)
+	if owner.receivedStatus != ParkingAvailable {
+		t.Errorf("owner is not notified")
+	}
+}
+
+func TestNotifiedSubscriberThatParkingAvailableWhichSubscribedParkingStatusEdgeCase(t *testing.T) {
+	parking, _ := Newlot(2)
+	owner := &mockOwner{}
+	parking.subscriberParkingStatus = owner
+
+	parking.Park(car1)
+	parking.Park(car2)
+	parking.Unpark(car2)
+
+	if owner.receivedStatus != ParkingAvailable {
+		t.Errorf("owner is not notified")
+	}
+}
+
+func TestEqualityForVehicles(t *testing.T) {
+	vehicleOne := &vehicle{number: "RJ19"}
+	vehicleTwo := &vehicle{number: "RJ19"}
+	flag := vehicleOne.Equals(vehicleTwo)
+	if flag == false {
+		t.Errorf("vehicleOne and vehicleTwo should be equal")
+	}
+}
+
+func TestEqualityForVehiclesWithDifferentLotID(t *testing.T) {
+	vehicleOne := &vehicle{number: "RJ19"}
+	vehicleTwo := &vehicle{number: "RJ19"}
+	flag := vehicleOne.Equals(vehicleTwo)
+	if flag == false {
+		t.Errorf("vehicleOne and vehicleTwo should be equal")
+	}
+}
+
+func TestVehicleNotEqualToNil(t *testing.T) {
+	vehicleOne := &vehicle{number: "RJ19"}
+	flag := vehicleOne.Equals(nil)
+	if flag == true {
+		t.Errorf("vehicleOne should not be equal to nil")
+	}
+}
+
+func TestParkAfterParkingAvailable(t *testing.T) {
+	lot, _ := Newlot(1)
+	lot.Park(car1)
+	lot.Unpark(car1)
+	_, err := lot.Park(car1)
+	if err != nil {
+		t.Errorf("parking should take place after parking available")
+	}
+}
+
+func TestUnparkNilVehicle(t *testing.T) {
+	lot, _ := Newlot(2)
+	_, actualErr := lot.Unpark(nil)
+	expectedErr := errors.New("nil vehicle cannot be unparked")
+	if actualErr.Error() != expectedErr.Error() {
+		t.Errorf("nil vehicle cannot be unparked")
+	}
+}
+
+func TestNotifySubscriberWhenParkingAvailable(t *testing.T) {
+	parking, _ := Newlot(2)
+	owner := &mockOwner{}
+	parking.subscriberParkingStatus = owner
+
+	parking.Park(car1)
+	parking.Park(car2)
+	parking.Unpark(car1)
+
+	if owner.receivedStatus != ParkingAvailable {
+		t.Errorf("owner is not notified")
+	}
+}
+
+func TestNewVehicle(t *testing.T) {
+	_, err := NewVehicle("23BH6543IS")
+	if err != nil {
+		t.Errorf("vehicle should be created with provided number")
+	}
+}
+
+func TestNewVehicleShouldNotCreatedWithEmptyNumber(t *testing.T) {
+	_, err := NewVehicle("")
+	if err == nil {
+		t.Errorf("vehicle should be created with provided number")
+	}
+}
+
+func TestUnparkCannotDoneForNonExistentVehicle(t *testing.T) {
+	lot, _ := Newlot(2)
+
+	lot.Park(car2)
+	_, actualErr := lot.Unpark(car1)
+	expectedErr := errors.New("vehicle not parked in the parking lot")
+	if actualErr.Error() != expectedErr.Error() {
+		t.Errorf("attendance cannot unpark the nonexistent vehicle")
+	}
+}
+
+func TestNewParkingLotWithId(t *testing.T) {
+	lot, err := NewlotV2(1, 2)
+	if err != nil {
+		t.Fatal("new lot is not created with id 1")
+	}
+	if lot.id != 1 {
+		t.Fatal("id of the lot should be equal to 1")
+	}
+}
+
+func TestNewlotv2ShouldNotCreateLotWithZeroCapacity(t *testing.T) {
+	lot, err := NewlotV2(1, 0)
+	if err == nil {
+		t.Fatal("lot should not be created with zero capacity")
+	}
+	if lot != nil {
+		t.Fatal("lot should be nil")
+	}
+}
+
+func TestNotifiedParkingFullWithLotId(t *testing.T) {
+	l, _ := NewlotV2(1, 1)
+	mockSubscriber := &mockParkingFull{}
+	l.AddSubscriberParkingFull(mockSubscriber)
+	_, err := l.Park(car1)
+	if err != nil {
+		t.Fatalf("park setup failed %v", err)
+	}
+
+	if mockSubscriber.id != 1 {
+		t.Fatal("received id of the lot should be 1")
+	}
+
 }

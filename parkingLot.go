@@ -4,84 +4,150 @@ import "errors"
 
 type vehicle struct {
 	number string
-	lotId  uint
 }
 
-type Lot struct {
-	capacity                    uint
-	vehicles                    []*vehicle
-	subscribersParkingFull      []ParkingFullReceiver
-	subscribersParkingAvailable []ParkingAvailableReceiver
+func NewVehicle(number string) (*vehicle, error) {
+	if number == "" {
+		return nil, errors.New("vehicle number is mandatory")
+	}
+	return &vehicle{number: number}, nil
+}
+func (v *vehicle) Equals(vehicleTwo *vehicle) bool {
+	if vehicleTwo == nil {
+		return false
+	}
+	if v.number == vehicleTwo.number {
+		return true
+	}
+	return false
 }
 
-type ParkingAvailableReceiver interface {
-	ReceiveParkingAvailable()
+
+type lot struct {
+	capacity                uint
+	vehicles                []*vehicle
+	subscribersParkingFull  []ParkingFullReceiver
+	subscriberParkingStatus ParkingStatusReceiver
+	id                      uint
+}
+
+type ParkingStatus uint
+
+const (
+	Unknown ParkingStatus = iota
+	ParkingAvailable
+	ParkingFull
+)
+
+type ParkingStatusReceiver interface {
+	Receive(status ParkingStatus)
 }
 
 type ParkingFullReceiver interface {
-	ReceiveParkingFull()
+	ParkingFullReceive(i uint)
 }
 
-func (l *Lot) SubscribeParkingFullStatus(subscriber ParkingFullReceiver) {
+func (l *lot) AddSubscriberParkingFull(subscriber ParkingFullReceiver) {
 	l.subscribersParkingFull = append(l.subscribersParkingFull, subscriber)
 }
 
-func (l *Lot) SubscribeParkingAvailableStatus(subscriber ParkingAvailableReceiver) {
-	l.subscribersParkingAvailable = append(l.subscribersParkingAvailable, subscriber)
-}
-
-func (l *Lot) Unpark(vehicleNumber string) (*vehicle, error) {
-	if vehicleNumber == "" {
-		return nil, errors.New("vehicle number is manadatory to unpark the vehicle")
+func (l *lot) Unpark(car *vehicle) (*vehicle, error) {
+	if car == nil {
+		return nil, errors.New("nil vehicle cannot be unparked")
 	}
-	var lotId uint
 	for i := 0; i < len(l.vehicles); i++ {
-		if l.vehicles[i] != nil && l.vehicles[i].number == vehicleNumber {
-			lotId = uint(i + 1)
-			l.vehicles[i].number = ""
+		if l.isFreeSlot(i) {
+			continue
+		}
+		//TODO indentation
+		if l.vehicles[i].Equals(car) {
 			l.vehicles[i] = nil
-			if int(lotId) == len((*l).vehicles) {
-				for j := 0; j < len(l.subscribersParkingAvailable); j++ {
-					if l.subscribersParkingAvailable[j] != nil {
-						l.subscribersParkingAvailable[j].ReceiveParkingAvailable()
-					}
-				}
-			}
-			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
+			l.notifyParkingAvailable()
+			return car, nil
 		}
 	}
-	return nil, errors.New("vehicle not parked in the parking lot with provided number")
+	return nil, errors.New("vehicle not parked in the parking lot")
 }
 
-func Newlot(capacity uint) (*Lot, error) {
+func (l *lot) notifyParkingAvailable() {
+	vehicleCount := 0
+	for i := 0; i < len(l.vehicles); i++ {
+		if l.vehicles[i] != nil {
+			vehicleCount++
+		}
+	}
+	if uint(vehicleCount+1) != l.capacity {
+		return
+	}
+	if l.subscriberParkingStatus != nil {
+		l.subscriberParkingStatus.Receive(ParkingAvailable)
+	}
+}
+
+func (l *lot) isFreeSlot(i int) bool {
+	return l.vehicles[i] == nil
+}
+
+func Newlot(capacity uint) (*lot, error) {
 	if capacity == 0 {
 		return nil, errors.New("capacity can't be zero")
 	}
 	l := make([]*vehicle, capacity)
-	return &Lot{capacity: capacity, vehicles: l}, nil
+	return &lot{capacity: capacity, vehicles: l}, nil
 }
 
-func (l *Lot) Park(vehicleNumber string) (*vehicle, error) {
-	if vehicleNumber == "" {
+func NewlotV2(id, capacity uint) (*lot, error) {
+	l, err := Newlot(capacity)
+	if err != nil {
+		return nil, err
+	}
+	l.id = id
+	return l, nil
+}
+
+func (l *lot) notifyParkingFull() {
+	vehicleCount := 0
+	for i := 0; i < len(l.vehicles); i++ {
+		if l.vehicles[i] != nil {
+			vehicleCount++
+		}
+	}
+	if uint(vehicleCount) != l.capacity {
+		return
+	}
+	if l.subscriberParkingStatus != nil {
+		l.subscriberParkingStatus.Receive(ParkingFull)
+	}
+	for _, subscriber := range l.subscribersParkingFull {
+		subscriber.ParkingFullReceive(l.id)
+	}
+}
+
+func (l *lot) Park(vehicle *vehicle) (*vehicle, error) {
+	if vehicle == nil {
 		return nil, errors.New("vehicle number is mandatory to park")
 	}
-	var lotId uint
-	for i := 0; i < len((*l).vehicles); i++ {
-		if (*l).vehicles[i] == nil {
-			lotId = uint(i + 1)
-			(*l).vehicles[i] = &vehicle{number: vehicleNumber, lotId: uint(i + 1)}
-			if int(lotId) == len((*l).vehicles) {
-				for j := 0; j < len(l.subscribersParkingFull); j++ {
-					if l.subscribersParkingFull[j] != nil {
-						l.subscribersParkingFull[j].ReceiveParkingFull()
-					}
-				}
-			}
-			return &vehicle{number: vehicleNumber, lotId: lotId}, nil
-		}
-		if (*l).vehicles[i].number == vehicleNumber {
-			return nil, errors.New("car already parked in parking lot")
+
+	if l.isparked(vehicle) {
+		return nil, errors.New("car already parked in parking lot")
+	}
+
+	//find available slot
+	for i := 0; i < len(l.vehicles); i++ {
+		if l.isFreeSlot(i) {
+			l.vehicles[i] = vehicle
+			l.notifyParkingFull()
+			return vehicle, nil
 		}
 	}
 	return nil, errors.New("parking lot is full")
+}
+
+func (l *lot) isparked(vehicle *vehicle) bool {
+	for i := 0; i < len(l.vehicles); i++ {
+		if vehicle.Equals(l.vehicles[i]) {
+			return true
+		}
+	}
+	return false
 }
