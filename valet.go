@@ -23,6 +23,12 @@ type attendant struct {
 
 type parkingStrategyFunction func(a *attendant) (*lot, int, error)
 
+var parkingStrategyMap = map[method]parkingStrategyFunction{
+    FirstAvailableSlot: (*attendant).findFirstAvailableLot,
+    LeastFilledLot:     (*attendant).findLeastFilledLot,
+    MostFilledLot:      (*attendant).findMostFilledLot,
+}
+
 // attendant implements ParkingStatusReceiver
 func (a *attendant) Receive(id uint, status ParkingStatus) {
 	if status == ParkingAvailable {
@@ -143,14 +149,15 @@ func NewAttendant(parkingMethod uint, lots ...*lot) (*attendant, error) {
 	parkingFull := make([]bool, len(lots)+1)
 	l = append(l, lots...)
 	a := &attendant{lots: l, parkingFull: parkingFull, parkingMethod: method(parkingMethod)}
-	switch a.parkingMethod {
-	case FirstAvailableSlot:
-		a.parkingStrategyFunction = (*attendant).findFirstAvailableLot
-	case LeastFilledLot:
-		a.parkingStrategyFunction = (*attendant).findLeastFilledLot
-	case MostFilledLot:
-		a.parkingStrategyFunction = (*attendant).findMostFilledLot
+
+	parkingStrategyFn, ok := parkingStrategyMap[a.parkingMethod]
+
+	if ok {
+		a.parkingStrategyFunction = parkingStrategyFn
+	} else {
+		return nil, errors.New("invalid parking method")
 	}
+
 	for _, lot := range lots {
 		lot.AddSubscriberParkingStatus(a)
 	}
