@@ -108,7 +108,6 @@ func TestCarParkingAlreadyParkedInAnySlot(t *testing.T) {
 	if err == nil {
 		t.Fatalf("should give error car already parked")
 	}
-
 }
 
 type mockParkingFull struct {

@@ -22,6 +22,7 @@ func (v *vehicle) Equals(vehicleTwo *vehicle) bool {
 	return false
 }
 
+
 type lot struct {
 	capacity                uint
 	vehicles                []*vehicle
