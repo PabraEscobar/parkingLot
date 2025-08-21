@@ -18,7 +18,10 @@ type attendant struct {
 	lots        []*lot
 	parkingFull []bool
 	parkingMethod method
+	parkingStrategyFunction parkingStrategyFunction
 }
+
+type parkingStrategyFunction func(a *attendant) (*lot, int, error)
 
 // attendant implements ParkingStatusReceiver
 func (a *attendant) Receive(id uint, status ParkingStatus) {
@@ -140,6 +143,14 @@ func NewAttendant(parkingMethod uint, lots ...*lot) (*attendant, error) {
 	parkingFull := make([]bool, len(lots)+1)
 	l = append(l, lots...)
 	a := &attendant{lots: l, parkingFull: parkingFull, parkingMethod: method(parkingMethod)}
+	switch a.parkingMethod {
+	case FirstAvailableSlot:
+		a.parkingStrategyFunction = (*attendant).findFirstAvailableLot
+	case LeastFilledLot:
+		a.parkingStrategyFunction = (*attendant).findLeastFilledLot
+	case MostFilledLot:
+		a.parkingStrategyFunction = (*attendant).findMostFilledLot
+	}
 	for _, lot := range lots {
 		lot.AddSubscriberParkingStatus(a)
 	}
